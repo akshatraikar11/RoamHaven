@@ -10,6 +10,7 @@ const sampleListings = [
     price: 1500,
     location: "Malibu",
     country: "United States",
+    category: "trending",
   },
   {
     title: "Modern Loft in Downtown",
@@ -22,6 +23,7 @@ const sampleListings = [
     price: 1200,
     location: "New York City",
     country: "United States",
+    category: "iconic_cities",
   },
   {
     title: "Mountain Retreat",
@@ -34,6 +36,7 @@ const sampleListings = [
     price: 1000,
     location: "Aspen",
     country: "United States",
+    category: "mountains",
   },
   {
     title: "Historic Villa in Tuscany",
@@ -46,6 +49,7 @@ const sampleListings = [
     price: 2500,
     location: "Florence",
     country: "Italy",
+    category: "iconic_cities",
   },
   {
     title: "Secluded Treehouse Getaway",
@@ -58,6 +62,7 @@ const sampleListings = [
     price: 800,
     location: "Portland",
     country: "United States",
+    category: "camping",
   },
   {
     title: "Beachfront Paradise",
@@ -70,6 +75,7 @@ const sampleListings = [
     price: 2000,
     location: "Cancun",
     country: "Mexico",
+    category: "pools",
   },
   {
     title: "Rustic Cabin by the Lake",
@@ -82,6 +88,7 @@ const sampleListings = [
     price: 900,
     location: "Lake Tahoe",
     country: "United States",
+    category: "mountains",
   },
   {
     title: "Luxury Penthouse with City Views",
@@ -94,6 +101,7 @@ const sampleListings = [
     price: 3500,
     location: "Los Angeles",
     country: "United States",
+    category: "iconic_cities",
   },
   {
     title: "Ski-In/Ski-Out Chalet",
@@ -106,6 +114,7 @@ const sampleListings = [
     price: 3000,
     location: "Verbier",
     country: "Switzerland",
+    category: "arctic",
   },
   {
     title: "Safari Lodge in the Serengeti",
@@ -118,6 +127,7 @@ const sampleListings = [
     price: 4000,
     location: "Serengeti National Park",
     country: "Tanzania",
+    category: "camping",
   },
   {
     title: "Historic Canal House",
@@ -130,6 +140,7 @@ const sampleListings = [
     price: 1800,
     location: "Amsterdam",
     country: "Netherlands",
+    category: "iconic_cities",
   },
   {
     title: "Private Island Retreat",
@@ -142,6 +153,7 @@ const sampleListings = [
     price: 10000,
     location: "Fiji",
     country: "Fiji",
+    category: "trending",
   },
   {
     title: "Charming Cottage in the Cotswolds",
@@ -154,6 +166,7 @@ const sampleListings = [
     price: 1200,
     location: "Cotswolds",
     country: "United Kingdom",
+    category: "farms",
   },
   {
     title: "Historic Brownstone in Boston",
@@ -166,6 +179,7 @@ const sampleListings = [
     price: 2200,
     location: "Boston",
     country: "United States",
+    category: "iconic_cities",
   },
   {
     title: "Beachfront Bungalow in Bali",
@@ -178,6 +192,7 @@ const sampleListings = [
     price: 1800,
     location: "Bali",
     country: "Indonesia",
+    category: "pools",
   },
   {
     title: "Mountain View Cabin in Banff",
@@ -190,6 +205,7 @@ const sampleListings = [
     price: 1500,
     location: "Banff",
     country: "Canada",
+    category: "mountains",
   },
   {
     title: "Art Deco Apartment in Miami",
@@ -202,6 +218,7 @@ const sampleListings = [
     price: 1600,
     location: "Miami",
     country: "United States",
+    category: "trending",
   },
   {
     title: "Tropical Villa in Phuket",
@@ -214,6 +231,7 @@ const sampleListings = [
     price: 3000,
     location: "Phuket",
     country: "Thailand",
+    category: "pools",
   },
   {
     title: "Historic Castle in Scotland",
@@ -226,6 +244,7 @@ const sampleListings = [
     price: 4000,
     location: "Scottish Highlands",
     country: "United Kingdom",
+    category: "castles",
   },
   {
     title: "Desert Oasis in Dubai",
@@ -238,6 +257,7 @@ const sampleListings = [
     price: 5000,
     location: "Dubai",
     country: "United Arab Emirates",
+    category: "trending",
   },
   {
     title: "Rustic Log Cabin in Montana",
@@ -250,6 +270,7 @@ const sampleListings = [
     price: 1100,
     location: "Montana",
     country: "United States",
+    category: "mountains",
   },
   {
     title: "Beachfront Villa in Greece",
@@ -262,6 +283,7 @@ const sampleListings = [
     price: 2500,
     location: "Mykonos",
     country: "Greece",
+    category: "pools",
   },
   {
     title: "Eco-Friendly Treehouse Retreat",
@@ -274,6 +296,7 @@ const sampleListings = [
     price: 750,
     location: "Costa Rica",
     country: "Costa Rica",
+    category: "camping",
   },
   {
     title: "Historic Cottage in Charleston",
@@ -286,6 +309,7 @@ const sampleListings = [
     price: 1600,
     location: "Charleston",
     country: "United States",
+    category: "farms",
   },
   {
     title: "Modern Apartment in Tokyo",
@@ -298,6 +322,7 @@ const sampleListings = [
     price: 2000,
     location: "Tokyo",
     country: "Japan",
+    category: "iconic_cities",
   },
   {
     title: "Lakefront Cabin in New Hampshire",
@@ -310,6 +335,7 @@ const sampleListings = [
     price: 1200,
     location: "New Hampshire",
     country: "United States",
+    category: "camping",
   },
   {
     title: "Luxury Villa in the Maldives",
@@ -322,6 +348,7 @@ const sampleListings = [
     price: 6000,
     location: "Maldives",
     country: "Maldives",
+    category: "pools",
   },
   {
     title: "Ski Chalet in Aspen",
@@ -334,6 +361,7 @@ const sampleListings = [
     price: 4000,
     location: "Aspen",
     country: "United States",
+    category: "arctic",
   },
   {
     title: "Secluded Beach House in Costa Rica",
@@ -341,14 +369,146 @@ const sampleListings = [
       "Escape to a secluded beach house on the Pacific coast of Costa Rica. Surf, relax, and unwind.",
     image: {
       filename: "listingimage",
-     url: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVhY2glMjBob3VzZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+      url: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVhY2glMjBob3VzZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
     },
     price: 1800,
     location: "Costa Rica",
     country: "Costa Rica",
+    category: "trending",
+  },
+  // PG Hostel Listings
+  {
+    title: "Modern PG near Delhi University",
+    description:
+      "Fully furnished PG accommodation near North Campus with WiFi, meals, and laundry facilities. Perfect for students and working professionals.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 8000,
+    location: "Delhi",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Ladies Hostel in Bangalore BTM",
+    description:
+      "Safe and secure ladies hostel with 24/7 security, home-cooked meals, and modern amenities. Close to metro station and IT parks.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 7500,
+    location: "Bangalore",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Budget PG in Pune Hinjewadi",
+    description:
+      "Affordable paying guest accommodation near Hinjewadi IT Hub. Includes WiFi, AC rooms, and mess facility. Ideal for IT professionals.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 6500,
+    location: "Pune",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Premium PG in Mumbai Andheri",
+    description:
+      "Luxurious PG accommodation with gym, rooftop terrace, and premium amenities. Walking distance from Andheri station.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 12000,
+    location: "Mumbai",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Student Hostel near IIT Madras",
+    description:
+      "Well-maintained hostel for students near IIT Madras. Includes study room, WiFi, and nutritious meals. Friendly environment.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1560185127-6a7e6c4c9b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 5500,
+    location: "Chennai",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Co-living PG in Gurgaon Sector 43",
+    description:
+      "Modern co-living space with shared kitchen, lounge area, and high-speed internet. Perfect for young professionals in corporate sector.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 9500,
+    location: "Gurgaon",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Boys PG near Hyderabad HITEC City",
+    description:
+      "Comfortable boys PG near HITEC City with AC rooms, WiFi, and housekeeping. Close to major IT companies and shopping centers.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1556911220-bff31c812dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 7000,
+    location: "Hyderabad",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Affordable Hostel in Kolkata Salt Lake",
+    description:
+      "Budget-friendly hostel in Salt Lake with basic amenities and good connectivity. Suitable for students and professionals on a budget.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 5000,
+    location: "Kolkata",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Executive PG in Noida Sector 62",
+    description:
+      "Premium executive PG with attached bathrooms, gym facility, and 24/7 power backup. Located in prime Noida location near metro.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 10500,
+    location: "Noida",
+    country: "India",
+    category: "pg_hostel",
+  },
+  {
+    title: "Shared PG in Jaipur Vaishali Nagar",
+    description:
+      "Economical shared accommodation in Vaishali Nagar with meals included. Great community atmosphere for students and young professionals.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60",
+    },
+    price: 4500,
+    location: "Jaipur",
+    country: "India",
+    category: "pg_hostel",
   },
 ];
-  
+
 
 // ✅ Define convertedListings BEFORE exporting
 const convertedListings = sampleListings.map((listing) => ({

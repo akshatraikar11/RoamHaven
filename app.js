@@ -23,7 +23,8 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-const dbUrl = process.env.ATLASDB_URL;
+// Use Atlas URL from environment when available, otherwise fall back to local MongoDB
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/roamheavn";
 
 main()
   .then(() => {
@@ -41,7 +42,6 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
-app.use(express.static(path.join(__dirname, "/public")));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
@@ -69,9 +69,10 @@ const sessionOptions = {
   },
 };
 
-// app.get("/", (req, res) => {
-//   res.send("Hi , I am root");
-// });
+// Root route: redirect to listings index
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
 passport.use(new LocalStrategy(User.authenticate()));
 
@@ -91,9 +92,12 @@ app.use((req, res, next) => {
   next();
 });
 
+const bookingRouter = require("./routes/bookings.js");
+
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
+app.use("/bookings", bookingRouter);
 
 // app.all("*", (req, res, next) => {
 //   next(new ExpressError(404, "Page Not Found"));

@@ -2,11 +2,15 @@
   "engines": {
     "node": "18.18.0"
   },
-  "name": "RoamHeavn",
+  "name": "roamhaven",
+  "displayName": "RoamHaven",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "init-db": "node init/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,7 +23,7 @@
     "connect-flash": "^0.1.1",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "ejs-mate": "^4.0.0",
     "express": "^5.1.0",
@@ -27,7 +31,8 @@
     "express-sessions": "^1.0.6",
     "joi": "^17.13.3",
     "method-override": "^3.0.0",
-    "mongoose": "^8.15.2",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.19.2",
     "multer": "^2.0.1",
     "multer-storage-cloudinary": "^4.0.0",
     "node-geocoder": "^4.4.1",

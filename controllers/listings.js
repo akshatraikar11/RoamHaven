@@ -26,14 +26,32 @@ module.exports.ShowListing = async (req, res) => {
     req.flash("error", " Listing you requested for does not exist!");
     return res.redirect("/listings");
   }
+
+  // Check if current user has already booked this listing
+  let hasBooked = false;
+  if (req.user) {
+    const Booking = require("../models/booking.js");
+    const existingBooking = await Booking.findOne({
+      listing: id,
+      user: req.user._id
+    });
+    hasBooked = !!existingBooking;
+  }
+
   console.log(listing);
-  res.render("listings/show.ejs", { listing });
+  res.render("listings/show.ejs", { listing, hasBooked });
 };
 
 // map by me
-   module.exports.createListing = async (req, res) => {
-  // 1. Geocode location using LocationIQ
+module.exports.createListing = async (req, res) => {
+  // 1. Geocode location using OpenCage API
   const geoData = await geocoder.geocode(req.body.listing.location);
+
+  if (!geoData || geoData.length === 0) {
+    req.flash("error", "Invalid location. Please try a different location.");
+    return res.redirect("/listings/new");
+  }
+
   const coordinates = [geoData[0].longitude, geoData[0].latitude];
 
   // 2. Create new listing and assign geolocation

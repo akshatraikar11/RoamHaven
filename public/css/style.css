@@ -87,6 +87,7 @@ body {
 .card-img-overlay {
   opacity: 0;
 }
+
 .card-img-overlay:hover {
   opacity: 0.2;
   background-color: white;
@@ -94,7 +95,7 @@ body {
 
 /* New Page */
 .add-btn {
-  background-color:rgb(98, 24, 178)!important;
+  background-color: rgb(98, 24, 178) !important;
   border: none !important;
 }
 
@@ -120,6 +121,5 @@ body {
 
 /* Map */
 #map {
- height: 400px;
+  height: 400px;
 }
-
