@@ -1,0 +1,56 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4" style="background-color: #e6f1f2 "!important;>
+  <a href="/listings/<%= listing._id %>">← Back to Listing</a>
+
+  <div class="row mt-3">
+    <!-- Booking Details -->
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h4>Booking Details</h4>
+        <p><b>Listing:</b> <%= listing.title %></p>
+        <p><b>Price:</b> ₹<%= listing.price.toLocaleString("en-IN") %></p>
+        <p><b>Location:</b> <%= listing.location %></p>
+      </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h4>User Information</h4>
+        <form action="/bookings" method="POST">
+          <input type="hidden" name="listingId" value="<%= listing._id %>">
+
+          <div class="mb-3">
+            <label>Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Mobile Number</label>
+            <input type="text" name="mobile" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+
+          <!-- Start Date -->
+          <div class="mb-3">
+            <label>Start Date</label>
+            <input type="date" name="startDate" class="form-control" required>
+          </div>
+
+          <!-- End Date -->
+          <div class="mb-3">
+            <label>End Date</label>
+            <input type="date" name="endDate" class="form-control" required>
+          </div>
+
+          <button type="submit" class="btn btn-success">Confirm Booking</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
