@@ -1,0 +1,96 @@
+<!-- Floating Jarvis Button -->
+<div id="jarvis-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 999;">
+  <img src="/images/jarvis.png" alt="Ask Jarvis" width="70" style="border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+</div>
+
+<!-- Jarvis Chatbot Popup -->
+<div id="jarvis-popup" style="
+  display: none;
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 300px;
+  height: 400px;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  z-index: 1000;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow: hidden;
+">
+  <div style="background: #343a40; color: white; padding: 10px; font-weight: bold;">
+    Jarvis 🤖
+    <span id="jarvis-close" style="float: right; cursor: pointer;">&times;</span>
+  </div>
+  <div id="jarvis-chat" style="padding: 10px; height: 280px; overflow-y: auto; font-size: 0.9rem;">
+    <p><strong>Jarvis:</strong> Hello! How can I assist you today?</p>
+  </div>
+  <div style="padding: 10px; display: flex; gap: 5px;">
+    <input type="text" id="jarvis-input" placeholder="Ask me..." style="flex: 1; padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+    <button id="jarvis-send" class="btn btn-sm btn-primary">Send</button>
+  </div>
+</div>
+
+<!-- Jarvis Script -->
+<script>
+  const jarvisBtn = document.getElementById("jarvis-btn");
+  const jarvisPopup = document.getElementById("jarvis-popup");
+  const jarvisClose = document.getElementById("jarvis-close");
+  const jarvisSend = document.getElementById("jarvis-send");
+  const jarvisChat = document.getElementById("jarvis-chat");
+
+  speechSynthesis.onvoiceschanged = () => {
+    speechSynthesis.getVoices();
+  };
+
+  jarvisBtn.onclick = () => {
+    jarvisPopup.style.display = "block";
+  };
+
+  jarvisClose.onclick = () => {
+    jarvisPopup.style.display = "none";
+  };
+
+  jarvisSend.onclick = async () => {
+    const input = document.getElementById("jarvis-input");
+    const userText = input.value.trim();
+    if (!userText) return;
+
+    const userMsg = document.createElement("p");
+    userMsg.innerHTML = "<strong>You:</strong> " + userText;
+    jarvisChat.appendChild(userMsg);
+
+    const botMsg = document.createElement("p");
+    botMsg.innerHTML = "<strong>Jarvis:</strong> Typing...";
+    jarvisChat.appendChild(botMsg);
+
+    jarvisChat.scrollTop = jarvisChat.scrollHeight;
+
+    try {
+      const response = await fetch("/api/jarvis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText }),
+      });
+
+      const data = await response.json();
+      const jarvisResponse = data.reply || "Hmm, I couldn't figure that out.";
+
+      botMsg.innerHTML = "<strong>Jarvis:</strong> " + jarvisResponse;
+
+      const utterance = new SpeechSynthesisUtterance(jarvisResponse);
+      utterance.voice =
+        speechSynthesis.getVoices().find(v => v.name.includes("Google") || v.name.includes("Microsoft")) ||
+        speechSynthesis.getVoices()[0];
+      utterance.pitch = 1;
+      utterance.rate = 1;
+      speechSynthesis.speak(utterance);
+    } catch (err) {
+      botMsg.innerHTML = "<strong>Jarvis:</strong> Sorry, something went wrong.";
+    }
+
+    input.value = "";
+    jarvisChat.scrollTop = jarvisChat.scrollHeight;
+  };
+</script>
