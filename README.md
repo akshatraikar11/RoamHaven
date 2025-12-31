@@ -11,38 +11,26 @@
 
 ## ✨ Features
 
-### 🏠 **Listing Management**
-- Browse and search property listings
-- Create, edit, and delete your own listings
-- Upload property images with Cloudinary integration
-- Interactive maps with geocoding support
-- Detailed property information and amenities
+### 🏠 **Modern UI/UX**
+- **Airbnb-Style Design**: Stunning new interface with rounded cards, sticky booking summary, and clean typography
+- **Responsive Layout**: Fully optimized 2-column layout that adapts to all devices
+- **Interactive Elements**: Image galleries, heart favorites, and animated buttons
 
-### 👤 **User Authentication**
-- Secure user registration and login
-- Session-based authentication with Passport.js
-- Password encryption and security
-- User profile management
+### 🤖 **Smart AI Features**
+- **RoamMate Chatbot**: Intelligent rule-based assistant that searches the database for listings, checks prices, and answers queries (No API key required!)
+- **AI Trip Planner**: Generates personalized 3-day itineraries for any listing using Google Gemini (with smart fallback)
+- **Natural Language**: Chatbot understands complex queries like "Show me places in Nashik under 5000"
 
-### ⭐ **Reviews & Ratings**
-- Leave reviews and ratings for properties
-- View reviews from other travelers
-- Edit and delete your own reviews
+### � **Core Functionality**
+- **Listing Management**: Create, edit, delete listings with Cloudinary image upload
+- **Secure Auth**: User registration & login with Passport.js encryption
+- **Booking System**: Complete booking flow from request to payment logic
+- **Reviews & Ratings**: Detailed 5-star rating system with breakdown metrics
 
-### 📅 **Booking System**
-- Book properties for specific dates
-- Manage your bookings
-- View booking history
-
-### 🤖 **AI Assistant (Jarvis)**
-- Integrated AI chatbot powered by Google Generative AI
-- Get instant help and recommendations
-- Natural language interactions
-
-### 🗺️ **Location Services**
-- Geocoding with OpenCage API
-- Interactive maps for property locations
-- Location-based search
+### �🗺️ **Location Services**
+- **Geocoding**: Automatic coordinate generation for new listings
+- **Interactive Maps**: Dynamic maps on listing pages showing exact property location
+- **Location Search**: Find properties by city or region
 
 ---
 
