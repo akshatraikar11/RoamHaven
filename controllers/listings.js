@@ -113,3 +113,20 @@ module.exports.destroyListing = async (req, res) => {
   req.flash("success", " Listing Deleted! ");
   res.redirect("/listings");
 };
+
+// AI Itinerary Controller
+const { generateItinerary } = require("../utils/ai.js");
+module.exports.createItinerary = async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  try {
+    const itinerary = await generateItinerary(listing.title, listing.location);
+    res.json({ itinerary });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to generate itinerary" });
+  }
+};

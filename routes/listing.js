@@ -43,4 +43,7 @@ router.get(
   wrapAsync(listingController.renderEditForm)
 );
 
+// AI Itinerary Route
+router.post("/:id/itinerary", wrapAsync(listingController.createItinerary));
+
 module.exports = router;

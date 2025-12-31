@@ -1,24 +1,50 @@
 <% layout("/layouts/boilerplate") %>
-  <div class="row mt-3">
-    <h1 class="col-6 offset-3">SignUp on RoamHeavn</h1>
-    <div class="col-6 offset-3">
-      <form action="/signup" method="POST" class="needs-validation" novalidate>
-        <div class="mb-3">
-          <label for="username" class="form-label">Username</label>
-          <input name="username" id="username" type="text" class="form-control" required />
-          <div class="valid-feedback"> looks good!</div>
-        </div>
+  <div class="row mt-5">
+    <div class="col-8 offset-2 col-md-6 offset-md-3">
+      <div class="card shadow-sm border-0 auth-card">
+        <div class="card-body p-4 p-md-5">
+          <h2 class="text-center mb-4 fw-bold text-dark">Create Account</h2>
 
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input name="email" id="email" type="email" class="form-control" required />
-        </div>
+          <form action="/signup" method="POST" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="username" class="form-label fw-semibold text-secondary">Username</label>
+              <input name="username" id="username" type="text" class="form-control form-control-lg bg-light border-0"
+                required />
+              <div class="valid-feedback"> looks good!</div>
+            </div>
 
-        <div class="mb-3">
-          <label for="password" class="form-label">Password</label>
-          <input name="password" id="password" type="password" class="form-control" required />
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold text-secondary">Email</label>
+              <input name="email" id="email" type="email" class="form-control form-control-lg bg-light border-0"
+                required />
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label fw-semibold text-secondary">Password</label>
+              <input name="password" id="password" type="password"
+                class="form-control form-control-lg bg-light border-0" required />
+            </div>
+
+            <button class="btn btn-primary w-100 btn-lg mb-3">Sign Up</button>
+          </form>
+
+          <div class="d-flex align-items-center mb-3">
+            <hr class="flex-grow-1">
+            <span class="mx-3 text-muted">or</span>
+            <hr class="flex-grow-1">
+          </div>
+
+          <a href="/auth/google" class="btn btn-light w-100 btn-lg google-btn border">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google"
+              width="20" class="me-2 user-select-none">
+            Sign up with Google
+          </a>
+
+          <div class="text-center mt-4">
+            <p class="text-muted">Already have an account? <a href="/login"
+                class="text-decoration-none text-primary fw-bold">Log in</a></p>
+          </div>
         </div>
-        <button class="btn btn-success">SignUp</button>
-      </form>
+      </div>
     </div>
   </div>

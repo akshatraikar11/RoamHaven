@@ -1,56 +1,207 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="container mt-4" style="background-color: #e6f1f2 "!important;>
-  <a href="/listings/<%= listing._id %>">← Back to Listing</a>
-
-  <div class="row mt-3">
-    <!-- Booking Details -->
-    <div class="col-md-6">
-      <div class="card p-3">
-        <h4>Booking Details</h4>
-        <p><b>Listing:</b> <%= listing.title %></p>
-        <p><b>Price:</b> ₹<%= listing.price.toLocaleString("en-IN") %></p>
-        <p><b>Location:</b> <%= listing.location %></p>
+  <div class="booking-request-page">
+    <!-- Header -->
+    <div class="booking-header">
+      <div class="container-fluid px-5 py-3">
+        <a href="/listings/<%= listing._id %>" class="back-link">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1 class="booking-title">Request to book</h1>
       </div>
     </div>
 
-    <!-- User Information -->
-    <div class="col-md-6">
-      <div class="card p-3">
-        <h4>User Information</h4>
-        <form action="/bookings" method="POST">
-          <input type="hidden" name="listingId" value="<%= listing._id %>">
+    <!-- Main Content -->
+    <div class="container-fluid px-5 py-4">
+      <div class="row">
+        <!-- Left Column - Form -->
+        <div class="col-lg-7">
+          <form action="/bookings" method="POST" id="bookingForm">
+            <input type="hidden" name="listingId" value="<%= listing._id %>">
 
-          <div class="mb-3">
-            <label>Name</label>
-            <input type="text" name="name" class="form-control" required>
+            <!-- Message the Host Section -->
+            <div class="booking-section">
+              <h2 class="section-heading">Message the host</h2>
+              <p class="section-subtext">Before you can continue, let <%= listing.owner && listing.owner.username ?
+                  listing.owner.username : 'the host' %> know a little about your trip and why their place is a good
+                  fit.</p>
+
+              <div class="host-info-mini">
+                <div class="host-avatar-small">
+                  <%= (listing.owner && listing.owner.username) ? listing.owner.username.charAt(0).toUpperCase() : 'H'
+                    %>
+                </div>
+                <div>
+                  <h4 class="host-name">
+                    <%= (listing.owner && listing.owner.username) ? listing.owner.username : 'Host' %>
+                  </h4>
+                  <p class="host-tenure">Hosting since 2025</p>
+                </div>
+              </div>
+
+              <textarea class="form-control message-textarea" name="message" rows="5"
+                placeholder='Example: "Hi <%= (listing.owner && listing.owner.username) ? listing.owner.username : '
+                there' %>, my partner and I are going to a friend\'s wedding and your place is just down the road."'
+              required
+            ></textarea>
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- Guest Information -->
+            <div class="booking-section">
+              <h2 class="section-heading">Your information</h2>
+
+              <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control booking-input" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Mobile Number</label>
+                <input type="tel" name="mobile" class="form-control booking-input" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control booking-input" required>
+              </div>
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- Payment Section -->
+            <div class="booking-section">
+              <h2 class="section-heading">Proceed to payment</h2>
+              <p class="section-subtext">You'll be directed to Razorpay to complete payment.</p>
+              <p class="payment-info">
+                <i class="fa-solid fa-circle-info text-primary"></i>
+                The host has 24 hours to accept your request. You'll pay now, but get a full refund if the booking isn't
+                confirmed.
+              </p>
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- Terms -->
+            <div class="booking-section">
+              <p class="terms-text">
+                By selecting the button, I agree to the <a href="#" class="terms-link">booking terms</a>.
+              </p>
+
+              <button type="submit" class="btn btn-dark btn-lg w-100 continue-btn">
+                Continue to <i class="fa-brands fa-cc-stripe"></i> Razorpay
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Column - Booking Summary Card -->
+        <div class="col-lg-5">
+          <div class="booking-summary-sticky">
+            <div class="booking-summary-card">
+              <!-- Listing Preview -->
+              <div class="listing-preview">
+                <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="listing-thumbnail">
+                <div class="listing-info-mini">
+                  <h3 class="listing-name">
+                    <%= listing.title %>
+                  </h3>
+                  <p class="listing-rating">
+                    <i class="fa-solid fa-star"></i> 4.83 (40)
+                  </p>
+                </div>
+              </div>
+
+              <hr class="my-3">
+
+              <!-- Cancellation Policy -->
+              <div class="policy-section">
+                <h4 class="policy-title">Free cancellation</h4>
+                <p class="policy-text">Cancel within 24 hours for a full refund. <a href="#" class="policy-link">Full
+                    policy</a></p>
+              </div>
+
+              <hr class="my-3">
+
+              <!-- Dates -->
+              <div class="detail-row">
+                <h4 class="detail-label">Dates</h4>
+                <div class="detail-value-group">
+                  <input type="date" name="startDate" class="form-control date-input" id="startDate" required>
+                  <span class="date-separator">to</span>
+                  <input type="date" name="endDate" class="form-control date-input" id="endDate" required>
+                </div>
+                <button type="button" class="change-btn">Change</button>
+              </div>
+
+              <hr class="my-3">
+
+              <!-- Guests -->
+              <div class="detail-row">
+                <h4 class="detail-label">Guests</h4>
+                <p class="detail-value">1 adult</p>
+                <button type="button" class="change-btn">Change</button>
+              </div>
+
+              <hr class="my-3">
+
+              <!-- Price Details -->
+              <div class="price-details">
+                <h4 class="price-title">Price details</h4>
+                <div class="price-row">
+                  <span class="price-label">2 nights x ₹<%= (listing.price / 2).toLocaleString("en-IN") %></span>
+                  <span class="price-value">₹<%= listing.price.toLocaleString("en-IN") %></span>
+                </div>
+                <div class="price-row">
+                  <span class="price-label">Taxes</span>
+                  <span class="price-value">₹<%= Math.round(listing.price * 0.05).toLocaleString("en-IN") %></span>
+                </div>
+              </div>
+
+              <hr class="my-3">
+
+              <!-- Total -->
+              <div class="total-row">
+                <span class="total-label">Total INR</span>
+                <span class="total-value">₹<%= (listing.price + Math.round(listing.price *
+                    0.05)).toLocaleString("en-IN") %></span>
+              </div>
+
+              <a href="#" class="price-breakdown-link">Price breakdown</a>
+            </div>
           </div>
-
-          <div class="mb-3">
-            <label>Mobile Number</label>
-            <input type="text" name="mobile" class="form-control" required>
-          </div>
-
-          <div class="mb-3">
-            <label>Email</label>
-            <input type="email" name="email" class="form-control" required>
-          </div>
-
-          <!-- Start Date -->
-          <div class="mb-3">
-            <label>Start Date</label>
-            <input type="date" name="startDate" class="form-control" required>
-          </div>
-
-          <!-- End Date -->
-          <div class="mb-3">
-            <label>End Date</label>
-            <input type="date" name="endDate" class="form-control" required>
-          </div>
-
-          <button type="submit" class="btn btn-success">Confirm Booking</button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <script>
+    // Auto-calculate nights and update price
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    // Set default dates (2 days from now to 4 days from now)
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + 2);
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + 4);
+
+    startDateInput.value = startDate.toISOString().split('T')[0];
+    endDateInput.value = endDate.toISOString().split('T')[0];
+
+    // Set minimum dates
+    startDateInput.min = new Date().toISOString().split('T')[0];
+    endDateInput.min = new Date().toISOString().split('T')[0];
+
+    // Update end date minimum when start date changes
+    startDateInput.addEventListener('change', function () {
+      endDateInput.min = this.value;
+      if (endDateInput.value < this.value) {
+        const newEnd = new Date(this.value);
+        newEnd.setDate(newEnd.getDate() + 1);
+        endDateInput.value = newEnd.toISOString().split('T')[0];
+      }
+    });
+  </script>

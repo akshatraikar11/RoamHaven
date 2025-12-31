@@ -1,70 +1,107 @@
-<!-- Floating Jarvis Button -->
-<div id="jarvis-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 999;">
-  <img src="/images/jarvis.png" alt="Ask Jarvis" width="70" style="border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+<!-- Floating RoamMate Button -->
+<div id="jarvis-btn" style="position: fixed; bottom: 30px; right: 30px; z-index: 999; transition: transform 0.3s ease;">
+  <div
+    style="position: relative; width: 60px; height: 60px; background: #ff385c; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 20px rgba(255, 56, 92, 0.4); border: 3px solid white;">
+    <img src="/images/logo.svg?v=4" alt="Ask RoamMate" width="32" height="32" style="filter: brightness(0) invert(1);">
+    <span
+      style="position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; background: #2ecc71; border-radius: 50%; border: 3px solid white;"></span>
+  </div>
 </div>
 
-<!-- Jarvis Chatbot Popup -->
+<!-- RoamMate Chatbot Popup -->
 <div id="jarvis-popup" style="
   display: none;
   position: fixed;
-  bottom: 100px;
-  right: 20px;
-  width: 300px;
-  height: 400px;
-  background: #ffffff;
-  border: 1px solid #ccc;
+  bottom: 110px;
+  right: 30px;
+  width: 350px;
+  height: 480px;
   border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.2);
   z-index: 1000;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  overflow: hidden;
+  display: none;
+  flex-direction: column;
 ">
-  <div style="background: #343a40; color: white; padding: 10px; font-weight: bold;">
-    Jarvis 🤖
-    <span id="jarvis-close" style="float: right; cursor: pointer;">&times;</span>
+  <!-- Header -->
+  <div class="chat-header">
+    <div style="display: flex; align-items: center;">
+      <img src="/images/logo.svg?v=4" class="bot-avatar-small" style="background: white; padding: 4px;">
+      <span>RoamMate AI</span>
+    </div>
+    <span id="jarvis-close" style="cursor: pointer; font-size: 1.2rem; opacity: 0.8;">&times;</span>
   </div>
-  <div id="jarvis-chat" style="padding: 10px; height: 280px; overflow-y: auto; font-size: 0.9rem;">
-    <p><strong>Jarvis:</strong> Hello! How can I assist you today?</p>
+
+  <!-- Messages -->
+  <div id="jarvis-chat" class="chat-messages">
+    <div class="msg-bubble msg-bot">
+      👋 Hi! I'm <b>RoamMate</b>, your travel assistant.<br><br>
+      I can help you with:<br>
+      🏠 Find listings by location<br>
+      💰 Check prices & budgets<br>
+      📅 Booking assistance<br>
+      📞 Customer support<br><br>
+      Try asking: "Show me places in Nashik" or "How do I book?"
+    </div>
   </div>
-  <div style="padding: 10px; display: flex; gap: 5px;">
-    <input type="text" id="jarvis-input" placeholder="Ask me..." style="flex: 1; padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
-    <button id="jarvis-send" class="btn btn-sm btn-primary">Send</button>
+
+  <!-- Input -->
+  <div class="chat-input-area">
+    <div style="display: flex; gap: 8px;">
+      <input type="text" id="jarvis-input" placeholder="Ask about places to stay..."
+        style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #e0e0e0; outline: none; font-size: 0.95rem;">
+      <button id="jarvis-send" class="btn btn-primary"
+        style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-paper-plane" style="font-size: 0.9rem;"></i>
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- Jarvis Script -->
+<!-- Chat Logic -->
 <script>
   const jarvisBtn = document.getElementById("jarvis-btn");
   const jarvisPopup = document.getElementById("jarvis-popup");
   const jarvisClose = document.getElementById("jarvis-close");
   const jarvisSend = document.getElementById("jarvis-send");
   const jarvisChat = document.getElementById("jarvis-chat");
+  const jarvisInput = document.getElementById("jarvis-input");
 
-  speechSynthesis.onvoiceschanged = () => {
-    speechSynthesis.getVoices();
-  };
-
+  // Toggle Chat
   jarvisBtn.onclick = () => {
-    jarvisPopup.style.display = "block";
+    if (jarvisPopup.style.display === "none" || jarvisPopup.style.display === "") {
+      jarvisPopup.style.display = "flex";
+      jarvisInput.focus();
+    } else {
+      jarvisPopup.style.display = "none";
+    }
   };
 
   jarvisClose.onclick = () => {
     jarvisPopup.style.display = "none";
   };
 
-  jarvisSend.onclick = async () => {
-    const input = document.getElementById("jarvis-input");
-    const userText = input.value.trim();
+  // Hover Effect
+  jarvisBtn.onmouseover = () => jarvisBtn.style.transform = "scale(1.1)";
+  jarvisBtn.onmouseout = () => jarvisBtn.style.transform = "scale(1)";
+
+  // Send Logic
+  const sendMessage = async () => {
+    const userText = jarvisInput.value.trim();
     if (!userText) return;
 
-    const userMsg = document.createElement("p");
-    userMsg.innerHTML = "<strong>You:</strong> " + userText;
+    // Add User Message
+    const userMsg = document.createElement("div");
+    userMsg.className = "msg-bubble msg-user";
+    userMsg.innerHTML = userText;
     jarvisChat.appendChild(userMsg);
 
-    const botMsg = document.createElement("p");
-    botMsg.innerHTML = "<strong>Jarvis:</strong> Typing...";
-    jarvisChat.appendChild(botMsg);
+    jarvisInput.value = "";
+    jarvisChat.scrollTop = jarvisChat.scrollHeight;
 
+    // Add Loading Bubble
+    const loadingMsg = document.createElement("div");
+    loadingMsg.className = "msg-bubble msg-bot";
+    loadingMsg.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Thinking...`;
+    jarvisChat.appendChild(loadingMsg);
     jarvisChat.scrollTop = jarvisChat.scrollHeight;
 
     try {
@@ -75,22 +112,18 @@
       });
 
       const data = await response.json();
-      const jarvisResponse = data.reply || "Hmm, I couldn't figure that out.";
+      const reply = data.reply || "I'm having a bit of trouble connecting right now.";
 
-      botMsg.innerHTML = "<strong>Jarvis:</strong> " + jarvisResponse;
+      // Replace Loading with Reply
+      loadingMsg.innerHTML = reply;
 
-      const utterance = new SpeechSynthesisUtterance(jarvisResponse);
-      utterance.voice =
-        speechSynthesis.getVoices().find(v => v.name.includes("Google") || v.name.includes("Microsoft")) ||
-        speechSynthesis.getVoices()[0];
-      utterance.pitch = 1;
-      utterance.rate = 1;
-      speechSynthesis.speak(utterance);
     } catch (err) {
-      botMsg.innerHTML = "<strong>Jarvis:</strong> Sorry, something went wrong.";
+      loadingMsg.innerHTML = "Sorry, I couldn't reach the server.";
     }
-
-    input.value = "";
-    jarvisChat.scrollTop = jarvisChat.scrollHeight;
   };
+
+  jarvisSend.onclick = sendMessage;
+  jarvisInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
 </script>

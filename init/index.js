@@ -7,7 +7,7 @@ const initData = require("./data.js");
 const Listing = require("../models/listing.js");
 
 // Use Atlas URL from environment when available
-const MONGO_URL = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/roamheavn";
+const MONGO_URL = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/roamhaven";
 
 main()
   .then(() => {

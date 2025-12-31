@@ -10,7 +10,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "roamheavn",
+    folder: "roamhaven",
     allowed_formats: ["png", "jpg", "jpeg"],
   },
 });

@@ -1,14 +1,17 @@
 <style>
   .search-btn {
-    background-color: #fe424d;
+    background-color: #ff385c;
     color: #fff;
     border-radius: 25px;
     padding: 0 1rem 0 1rem;
+    border: none;
+    font-weight: 500;
   }
 
   .search-btn:hover {
-    background-color: #fe424d;
+    background-color: #ff385c;
     color: #fff;
+    opacity: 0.9;
   }
 
   .search-btn i {
@@ -24,41 +27,51 @@
 </style>
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-compass"></i></a>
+    <a class="navbar-brand" href="/listings">
+      <div class="brand-container">
+        <img src="/images/logo.svg?v=4" alt="RoamHaven Logo" class="brand-logo">
+        <span class="brand-text">RoamHaven</span>
+      </div>
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <!-- Left side - empty for now -->
       <div class="navbar-nav">
-        <a class="nav-link" href="/listings"> Explore</a>
+        <!-- Explore link removed as it's redundant with Brand Logo or we can keep it if needed, but request said replace -->
       </div>
 
-      <div class="navbar-nav ms-auto">
-        <form class="d-flex" role="search">
-          <input class="form-control me-2 search-inp" type="search" placeholder="Search destination" />
-          <button class="btn search-btn" type="submit">
-            <i class="fa-solid fa-magnifying-glass"></i>Search
+      <!-- Centered Search Pill -->
+      <div class="navbar-search-container">
+        <div class="search-bar-pill shadow-sm">
+          <div class="search-inputs">
+            <div class="search-item flex-grow-1">
+              <span class="search-label">Where</span>
+              <input class="search-input" type="text" placeholder="Search destinations">
+            </div>
+          </div>
+          <button class="search-icon-btn">
+            <i class="fa-solid fa-magnifying-glass"></i>
           </button>
-        </form>
+        </div>
       </div>
 
-      <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new"> <i>Your Home</i></a>
+      <!-- Right side buttons -->
+      <div class="navbar-nav ms-auto gap-2">
+        <a class="nav-link nav-btn" href="/listings/new">Your Home</a>
         <% if(!currUser) { %>
-          <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-          <a class="nav-link" href="/login"><b>Log in</b> </a>
+          <a class="nav-link nav-btn" href="/signup">Sign Up</a>
+          <a class="nav-link nav-btn" href="/login">Log in</a>
           <% } %>
             <% if(currUser) { %>
-              <a class="nav-link" href="/logout"><b>Log Out</b></a>
+              <a class="nav-link nav-btn" href="/logout">Log Out</a>
               <% } %>
       </div>
     </div>
   </div>
 
-  <!-- Jarvis Trigger Icon (Triggers chat.ejs popup) -->
-  <div id="jarvis-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 999;">
-    <img src="/images/jarvis.png" alt="Ask Jarvis" width="70" style="border-radius: 50%; cursor: pointer;">
-  </div>
+
 
 
 
