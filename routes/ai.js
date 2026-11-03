@@ -4,7 +4,7 @@ const wrapAsync = require("../utils/wrapAsync.js");
 const { isLoggedIn } = require("../middleware.js");
 const aiController = require("../controllers/ai.js");
 
-router.post("/ai/search", isLoggedIn, wrapAsync(aiController.naturalLanguageSearch));
+router.post("/ai/search", wrapAsync(aiController.naturalLanguageSearch));
 router.post(
   "/ai/generate-description",
   isLoggedIn,
