@@ -1,0 +1,103 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="account-page">
+  <div class="container py-4">
+    <!-- Account Navigation -->
+    <div class="account-nav mb-4">
+      <a href="/account/sessions" class="account-nav-link">
+        <i class="fa-solid fa-shield-halved"></i> Sessions
+      </a>
+      <a href="/account/activity" class="account-nav-link active">
+        <i class="fa-solid fa-clock-rotate-left"></i> Activity Log
+      </a>
+    </div>
+
+    <div class="mb-4">
+      <h2 class="fw-bold mb-1">Login Activity</h2>
+      <p class="text-muted mb-0">
+        Review your recent login history. If you see any unfamiliar activity, change your password immediately.
+      </p>
+    </div>
+
+    <% if (!loginHistory || loginHistory.length === 0) { %>
+      <div class="text-center py-5">
+        <i class="fa-solid fa-clock-rotate-left text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">No login activity recorded yet.</p>
+      </div>
+    <% } else { %>
+      <!-- Activity Table -->
+      <div class="activity-table-wrapper">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Date & Time</th>
+              <th>Browser</th>
+              <th>Device</th>
+              <th>IP Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% loginHistory.forEach(function(entry) { %>
+              <tr class="<%= entry.success ? 'activity-success' : 'activity-failed' %>">
+                <td>
+                  <% if (entry.success) { %>
+                    <span class="activity-badge activity-badge-success">
+                      <i class="fa-solid fa-check"></i> Success
+                    </span>
+                  <% } else { %>
+                    <span class="activity-badge activity-badge-failed">
+                      <i class="fa-solid fa-xmark"></i> Failed
+                    </span>
+                  <% } %>
+                </td>
+                <td>
+                  <%
+                    const d = new Date(entry.timestamp);
+                    const dateStr = d.toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'short', year: 'numeric'
+                    });
+                    const timeStr = d.toLocaleTimeString('en-IN', {
+                      hour: '2-digit', minute: '2-digit', hour12: true
+                    });
+                  %>
+                  <div class="activity-datetime">
+                    <span class="activity-date"><%= dateStr %></span>
+                    <span class="activity-time"><%= timeStr %></span>
+                  </div>
+                </td>
+                <td>
+                  <i class="fa-solid fa-globe me-1 text-muted"></i>
+                  <%= entry.browser || 'Unknown' %>
+                </td>
+                <td>
+                  <% if (entry.device === 'Desktop') { %>
+                    <i class="fa-solid fa-desktop me-1 text-muted"></i>
+                  <% } else { %>
+                    <i class="fa-solid fa-mobile-screen me-1 text-muted"></i>
+                  <% } %>
+                  <%= entry.device || 'Unknown' %>
+                </td>
+                <td>
+                  <code class="activity-ip"><%= entry.ip || 'Unknown' %></code>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-muted small mt-3">
+        Showing last <%= loginHistory.length %> login event<%= loginHistory.length !== 1 ? 's' : '' %> (max 50 stored)
+      </div>
+    <% } %>
+
+    <div class="mt-4 p-3 bg-light rounded-3">
+      <p class="mb-0 text-muted small">
+        <i class="fa-solid fa-circle-info me-1 text-primary"></i>
+        Suspicious activity? <a href="/account/sessions" class="text-decoration-none">Revoke all sessions</a>
+        and <a href="/forgot-password" class="text-decoration-none">reset your password</a> immediately.
+      </p>
+    </div>
+  </div>
+</div>

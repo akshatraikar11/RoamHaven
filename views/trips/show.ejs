@@ -1,0 +1,55 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <a href="/trips" class="text-decoration-none">&larr; Back to trips</a>
+  <h2 class="fw-bold mt-2 mb-1"><%= trip.name %></h2>
+  <p class="text-muted"><%= trip.destination || "No destination set" %></p>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="fw-semibold">Add listing to this trip</h5>
+      <form class="row g-2" method="POST" action="/trips/<%= trip._id %>/listings">
+        <div class="col-md-9">
+          <select class="form-select" name="listingId" required>
+            <option value="">Select a listing</option>
+            <% suggestedListings.forEach(l => { %>
+              <option value="<%= l._id %>"><%= l.title %> - <%= l.location %> (₹<%= l.price %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-dark w-100">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <% trip.listings.forEach(l => { 
+      const upvotes = (trip.votes || []).filter(v => String(v.listing) === String(l._id) && v.vote === "up").length;
+      const downvotes = (trip.votes || []).filter(v => String(v.listing) === String(l._id) && v.vote === "down").length;
+    %>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <img src="<%= l.image?.url || '' %>" class="card-img-top" style="height: 200px; object-fit: cover;" />
+          <div class="card-body">
+            <h5 class="mb-1"><%= l.title %></h5>
+            <p class="text-muted mb-2"><%= l.location %> · ₹<%= l.price %></p>
+            <div class="d-flex gap-2 align-items-center">
+              <form method="POST" action="/trips/<%= trip._id %>/vote">
+                <input type="hidden" name="listingId" value="<%= l._id %>" />
+                <input type="hidden" name="vote" value="up" />
+                <button class="btn btn-sm btn-outline-success">👍 <%= upvotes %></button>
+              </form>
+              <form method="POST" action="/trips/<%= trip._id %>/vote">
+                <input type="hidden" name="listingId" value="<%= l._id %>" />
+                <input type="hidden" name="vote" value="down" />
+                <button class="btn btn-sm btn-outline-danger">👎 <%= downvotes %></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>

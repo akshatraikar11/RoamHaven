@@ -1,0 +1,242 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <a href="/listings/<%= listing._id %>" class="text-muted text-decoration-none mb-2 d-inline-block">
+        <i class="fa-solid fa-arrow-left me-1"></i> Back to listing
+      </a>
+      <h2 class="fw-bold mb-0">Analytics — <%= listing.title %></h2>
+      <p class="text-muted"><%= listing.location %>, <%= listing.country %></p>
+    </div>
+    <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-dark">
+      <i class="fa-solid fa-pen me-1"></i> Edit Listing
+    </a>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+          <i class="fa-solid fa-eye"></i>
+        </div>
+        <div class="analytics-value"><%= listing.analytics ? listing.analytics.viewCount : 0 %></div>
+        <div class="analytics-label">Total Views</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+          <i class="fa-solid fa-mouse-pointer"></i>
+        </div>
+        <div class="analytics-value"><%= listing.analytics ? listing.analytics.clickCount : 0 %></div>
+        <div class="analytics-label">Total Clicks</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div class="analytics-value"><%= bookingCount %></div>
+        <div class="analytics-label">Total Bookings</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+          <i class="fa-solid fa-percent"></i>
+        </div>
+        <div class="analytics-value"><%= conversionRate %>%</div>
+        <div class="analytics-label">Conversion Rate</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #ff9a9e, #fad0c4);">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+        </div>
+        <div class="analytics-value">₹<%= (totalRevenueRupees || 0).toLocaleString("en-IN") %></div>
+        <div class="analytics-label">Booking Revenue</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <div class="analytics-value"><%= avgListingRating %></div>
+        <div class="analytics-label">Avg Rating</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="analytics-card">
+        <div class="analytics-icon" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="analytics-value"><%= confirmedBookings || 0 %></div>
+        <div class="analytics-label">Confirmed Bookings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conversion Funnel -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-8">
+      <div class="analytics-panel">
+        <h4 class="fw-bold mb-4">Conversion Funnel</h4>
+        <div class="funnel-container">
+          <%
+            const views = listing.analytics ? listing.analytics.viewCount : 0;
+            const clicks = listing.analytics ? listing.analytics.clickCount : 0;
+            const bookings = bookingCount;
+            const maxVal = Math.max(views, 1);
+          %>
+          <div class="funnel-step">
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: 100%; background: linear-gradient(90deg, #667eea, #764ba2);">
+                <span class="funnel-bar-label"><%= views %></span>
+              </div>
+            </div>
+            <span class="funnel-step-label">Views</span>
+          </div>
+          <div class="funnel-step">
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: <%= Math.max(5, (clicks / maxVal) * 100) %>%; background: linear-gradient(90deg, #f093fb, #f5576c);">
+                <span class="funnel-bar-label"><%= clicks %></span>
+              </div>
+            </div>
+            <span class="funnel-step-label">Clicks</span>
+          </div>
+          <div class="funnel-step">
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: <%= Math.max(5, (bookings / maxVal) * 100) %>%; background: linear-gradient(90deg, #43e97b, #38f9d7);">
+                <span class="funnel-bar-label"><%= bookings %></span>
+              </div>
+            </div>
+            <span class="funnel-step-label">Bookings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="analytics-panel">
+        <h4 class="fw-bold mb-4">Listing Details</h4>
+        <div class="detail-row">
+          <span class="text-muted">Category</span>
+          <span class="fw-semibold"><%= listing.category ? listing.category.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'N/A' %></span>
+        </div>
+        <div class="detail-row">
+          <span class="text-muted">Base Price</span>
+          <span class="fw-semibold">₹<%= listing.price.toLocaleString("en-IN") %>/night</span>
+        </div>
+        <% if (listing.weekendPrice) { %>
+        <div class="detail-row">
+          <span class="text-muted">Weekend Price</span>
+          <span class="fw-semibold">₹<%= listing.weekendPrice.toLocaleString("en-IN") %>/night</span>
+        </div>
+        <% } %>
+        <div class="detail-row">
+          <span class="text-muted">Max Guests</span>
+          <span class="fw-semibold"><%= listing.maxGuests || 2 %></span>
+        </div>
+        <div class="detail-row">
+          <span class="text-muted">Reviews</span>
+          <span class="fw-semibold"><%= listing.reviews ? listing.reviews.length : 0 %></span>
+        </div>
+        <div class="detail-row">
+          <span class="text-muted">Amenities</span>
+          <span class="fw-semibold"><%= listing.amenities ? listing.amenities.length : 0 %></span>
+        </div>
+        <div class="detail-row">
+          <span class="text-muted">Images</span>
+          <span class="fw-semibold"><%= listing.images ? listing.images.length : 1 %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analytics-panel mt-4">
+    <h4 class="fw-bold mb-4">Booking Trend (Last 6 Months)</h4>
+    <canvas id="bookingTrendChart" height="90"></canvas>
+  </div>
+
+  <!-- Tips Section -->
+  <div class="analytics-panel">
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Tips to Improve Performance</h4>
+    <div class="row g-3">
+      <% if (!listing.images || listing.images.length < 5) { %>
+        <div class="col-md-6">
+          <div class="tip-card">
+            <i class="fa-solid fa-camera text-primary"></i>
+            <div>
+              <strong>Add more photos</strong>
+              <p class="text-muted mb-0 small">Listings with 5+ photos get 2x more bookings</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      <% if (!listing.amenities || listing.amenities.length < 5) { %>
+        <div class="col-md-6">
+          <div class="tip-card">
+            <i class="fa-solid fa-list-check text-success"></i>
+            <div>
+              <strong>Add more amenities</strong>
+              <p class="text-muted mb-0 small">Guests filter by amenities — list everything you offer</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      <% if (!listing.weekendPrice) { %>
+        <div class="col-md-6">
+          <div class="tip-card">
+            <i class="fa-solid fa-tag text-danger"></i>
+            <div>
+              <strong>Set weekend pricing</strong>
+              <p class="text-muted mb-0 small">Dynamic pricing can increase your revenue by 15-20%</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      <div class="col-md-6">
+        <div class="tip-card">
+          <i class="fa-solid fa-pen text-info"></i>
+          <div>
+            <strong>Update your description</strong>
+            <p class="text-muted mb-0 small">Detailed descriptions improve search ranking and trust</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const bookingTrendLabels = <%- JSON.stringify(trendLabels || []) %>;
+  const bookingTrendValues = <%- JSON.stringify(trendValues || []) %>;
+  const bookingTrendCanvas = document.getElementById("bookingTrendChart");
+
+  if (bookingTrendCanvas && bookingTrendLabels.length) {
+    new Chart(bookingTrendCanvas, {
+      type: "line",
+      data: {
+        labels: bookingTrendLabels,
+        datasets: [{
+          label: "Bookings",
+          data: bookingTrendValues,
+          borderColor: "#ff385c",
+          backgroundColor: "rgba(255, 56, 92, 0.15)",
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, precision: 0 } }
+      }
+    });
+  }
+</script>

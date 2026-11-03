@@ -2,7 +2,7 @@
   <div class="row mt-3">
     <div class="col-8 offset-2">
       <br /><br />
-      <h3>Create a New Listing</h3>
+      <h3>List a Stay, PG, or Hostel</h3>
       <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="titles" class="form-label">Titles</label>
@@ -12,33 +12,43 @@
 
         <div class="mb-3">
           <label for="description" class="form-label">Description</label>
-          <textarea name="listing[description]" class="form-control" required></textarea>
+          <div class="d-flex gap-2 mb-2">
+            <button type="button" class="btn btn-outline-dark btn-sm" id="aiGenerateDescriptionBtn">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate with AI
+            </button>
+            <span class="small text-muted align-self-center" id="aiDescriptionStatus"></span>
+          </div>
+          <textarea name="listing[description]" class="form-control" id="listingDescription" required></textarea>
           <div class="invalid-feedback">Please enter a short description</div>
         </div>
 
-        <!-- <div class="mb-3">
-        <label for="image" class="form-label">Image Link</label>
-        <input
-          name="listing[image]"
-          placeholder="enter image URL/LINK"
-          type="text"
-          class="form-control"
-        />
-      </div> -->
-
+        <!-- Feature #9: Multi-Image Upload -->
         <div class="mb-3">
-          <label for="image" class="form-label"> Upload Listing Image </label>
-          <input name="listing[image]" type="file" class="form-control" required />
+          <label for="image" class="form-label">Upload Listing Images <span class="text-muted">(up to 10, first = cover)</span></label>
+          <input name="listing[image]" type="file" class="form-control" multiple accept="image/*" required id="imageUploadInput" />
+          <div class="image-preview-container mt-2" id="imagePreviewContainer"></div>
         </div>
 
         <div class="row">
           <div class="mb-3 col-4">
-            <label for="price" class="form-label">Price</label>
+            <label for="price" class="form-label">Price <span class="text-muted">(per night)</span></label>
             <input name="listing[price]" placeholder="1200" class="form-control" required />
             <div class="invalid-feedback">Please enter a valid Price</div>
           </div>
 
-          <div class="mb-3 col-8">
+          <!-- Feature #17: Weekend Price -->
+          <div class="mb-3 col-4">
+            <label for="weekendPrice" class="form-label">Weekend Price <span class="text-muted">(optional)</span></label>
+            <input name="listing[weekendPrice]" placeholder="1500" type="number" class="form-control" />
+            <small class="text-muted">Fri & Sat nights</small>
+          </div>
+          <div class="mb-3 col-4">
+            <label for="surgeMultiplier" class="form-label">Surge Multiplier <span class="text-muted">(optional)</span></label>
+            <input name="listing[surgeMultiplier]" placeholder="1.25" step="0.05" min="1" type="number" class="form-control" />
+            <small class="text-muted">Applies demand-based dynamic surge pricing</small>
+          </div>
+
+          <div class="mb-3 col-4">
             <label for="country" class="form-label">Country</label>
             <input name="listing[country]" placeholder="India" type="text" class="form-control" required />
             <div class="invalid-feedback">Country name should be valid</div>
@@ -58,7 +68,7 @@
             <option value="camping">Camping</option>
             <option value="farms">Farms</option>
             <option value="arctic">Arctic</option>
-            <option value="pg_hostel">PG Hostel</option>
+            <option value="pg_hostel">PGs, Hostels & Co-Living</option>
           </select>
           <div class="invalid-feedback">Please select a category</div>
         </div>
@@ -69,7 +79,132 @@
           <div class="invalid-feedback">location should be valid</div>
         </div>
 
+        <!-- Feature #23: Room Details -->
+        <div class="room-details-section mb-4">
+          <h5 class="mb-3"><i class="fa-solid fa-bed me-2"></i>Room Details</h5>
+          <div class="row">
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Max Guests</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="maxGuests" data-action="dec">−</button>
+                <input name="listing[maxGuests]" type="number" class="form-control text-center counter-input" value="2" min="1" max="50" id="maxGuests" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="maxGuests" data-action="inc">+</button>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Bedrooms</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bedrooms" data-action="dec">−</button>
+                <input name="listing[bedrooms]" type="number" class="form-control text-center counter-input" value="1" min="0" max="50" id="bedrooms" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bedrooms" data-action="inc">+</button>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Bathrooms</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bathrooms" data-action="dec">−</button>
+                <input name="listing[bathrooms]" type="number" class="form-control text-center counter-input" value="1" min="0" max="50" id="bathrooms" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bathrooms" data-action="inc">+</button>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Beds</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="beds" data-action="dec">−</button>
+                <input name="listing[beds]" type="number" class="form-control text-center counter-input" value="1" min="0" max="50" id="beds" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="beds" data-action="inc">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature #13: Amenities System -->
+        <div class="amenities-select-section mb-4">
+          <h5 class="mb-3"><i class="fa-solid fa-sparkles me-2"></i>Amenities</h5>
+          <div class="amenities-grid">
+            <% for (let [key, val] of Object.entries(AMENITIES_MAP)) { %>
+              <label class="amenity-chip" for="amenity-<%= key %>">
+                <input type="checkbox" name="listing[amenities]" value="<%= key %>" id="amenity-<%= key %>" />
+                <span class="amenity-chip-inner">
+                  <i class="<%= val.icon %>"></i>
+                  <span><%= val.label %></span>
+                </span>
+              </label>
+            <% } %>
+          </div>
+        </div>
+
         <button class="btn btn-dark add-btn mt-3">Add</button>
       </form>
     </div>
   </div>
+
+  <!-- Counter Buttons Script -->
+  <script>
+    // Counter buttons for room details
+    document.querySelectorAll('.counter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.target);
+        const min = parseInt(target.min) || 0;
+        const max = parseInt(target.max) || 50;
+        let val = parseInt(target.value) || 0;
+        if (btn.dataset.action === 'inc' && val < max) target.value = val + 1;
+        if (btn.dataset.action === 'dec' && val > min) target.value = val - 1;
+      });
+    });
+
+    document.getElementById('aiGenerateDescriptionBtn')?.addEventListener('click', async () => {
+      const statusEl = document.getElementById('aiDescriptionStatus');
+      const descEl = document.getElementById('listingDescription');
+      const amenities = Array.from(document.querySelectorAll('input[name="listing[amenities]"]:checked'))
+        .map((el) => el.value);
+
+      statusEl.textContent = 'Generating...';
+      try {
+        const res = await fetch('/api/ai/generate-description', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: document.querySelector('[name="listing[title]"]')?.value,
+            location: document.querySelector('[name="listing[location]"]')?.value,
+            country: document.querySelector('[name="listing[country]"]')?.value,
+            category: document.querySelector('[name="listing[category]"]')?.value,
+            price: document.querySelector('[name="listing[price]"]')?.value,
+            bedrooms: document.querySelector('[name="listing[bedrooms]"]')?.value,
+            bathrooms: document.querySelector('[name="listing[bathrooms]"]')?.value,
+            maxGuests: document.querySelector('[name="listing[maxGuests]"]')?.value,
+            amenities,
+          }),
+        });
+        const data = await res.json();
+        if (data?.success && data.description) {
+          descEl.value = data.description.trim();
+          statusEl.textContent = 'Description generated.';
+        } else {
+          statusEl.textContent = data?.error || 'Could not generate description.';
+        }
+      } catch (_) {
+        statusEl.textContent = 'AI request failed.';
+      }
+    });
+
+    // Image preview
+    document.getElementById('imageUploadInput').addEventListener('change', function() {
+      const container = document.getElementById('imagePreviewContainer');
+      container.innerHTML = '';
+      const files = Array.from(this.files).slice(0, 10);
+      files.forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = 'image-preview-item';
+          div.innerHTML = `
+            <img src="${e.target.result}" alt="Preview ${i+1}" />
+            ${i === 0 ? '<span class="cover-badge">Cover</span>' : ''}
+          `;
+          container.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  </script>

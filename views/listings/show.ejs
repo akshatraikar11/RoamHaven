@@ -8,37 +8,72 @@
           <%= listing.title%>
         </h1>
         <div class="header-actions">
-          <button class="btn btn-link text-dark"><i class="fa-solid fa-arrow-up-from-bracket"></i> Share</button>
+          <a class="btn btn-link text-dark" href="/bookings/share-card?listingId=<%= listing._id %>" target="_blank"><i class="fa-solid fa-arrow-up-from-bracket"></i> Share Card</a>
           <button class="btn btn-link text-dark"><i class="fa-regular fa-heart"></i> Save</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Photo Gallery -->
+  <!-- Feature #9: Photo Gallery with Carousel -->
   <div class="container-fluid px-5 mb-4">
-    <div class="photo-gallery">
-      <div class="photo-main">
-        <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
+    <% const allImages = (listing.images && listing.images.length > 0) ? listing.images : [listing.image]; %>
+    <% if (allImages.length >= 5) { %>
+      <!-- Multi-image grid layout (Airbnb-style) -->
+      <div class="photo-gallery">
+        <div class="photo-main">
+          <img src="<%= allImages[0].url %>" alt="<%= listing.title %>" onclick="openLightbox(0)" style="cursor:pointer">
+        </div>
+        <div class="photo-grid">
+          <% for (let i = 1; i < Math.min(5, allImages.length); i++) { %>
+            <div class="photo-item <%= i === 4 ? 'photo-item-last' : '' %>">
+              <img src="<%= allImages[i].url %>" alt="<%= listing.title %> photo <%= i+1 %>" onclick="openLightbox(<%= i %>)" style="cursor:pointer">
+              <% if (i === 4 && allImages.length > 5) { %>
+                <button class="show-all-photos-btn" onclick="openLightbox(0)">
+                  <i class="fa-solid fa-grip"></i> Show all <%= allImages.length %> photos
+                </button>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
       </div>
-      <div class="photo-grid">
-        <div class="photo-item">
-          <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
+    <% } else if (allImages.length > 1) { %>
+      <!-- 2-4 images: carousel -->
+      <div class="photo-carousel-container">
+        <div class="photo-carousel" id="photoCarousel">
+          <% allImages.forEach((img, i) => { %>
+            <div class="carousel-slide <%= i === 0 ? 'active' : '' %>" data-index="<%= i %>">
+              <img src="<%= img.url %>" alt="<%= listing.title %> photo <%= i+1 %>" onclick="openLightbox(<%= i %>)" style="cursor:pointer">
+            </div>
+          <% }) %>
         </div>
-        <div class="photo-item">
-          <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
-        </div>
-        <div class="photo-item">
-          <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
-        </div>
-        <div class="photo-item photo-item-last">
-          <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
-          <button class="show-all-photos-btn">
-            <i class="fa-solid fa-grip"></i> Show all photos
-          </button>
+        <button class="carousel-btn carousel-prev" onclick="changeSlide(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="carousel-btn carousel-next" onclick="changeSlide(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="carousel-dots">
+          <% allImages.forEach((_, i) => { %>
+            <span class="carousel-dot <%= i === 0 ? 'active' : '' %>" onclick="goToSlide(<%= i %>)"></span>
+          <% }) %>
         </div>
       </div>
+    <% } else { %>
+      <!-- Single image -->
+      <div class="photo-gallery">
+        <div class="photo-main photo-single">
+          <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox-overlay" id="lightboxOverlay" style="display:none" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox(event)"><i class="fa-solid fa-xmark"></i></button>
+    <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1, event)"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <img id="lightboxImage" src="" alt="Fullscreen view" />
+      <div class="lightbox-counter" id="lightboxCounter"></div>
     </div>
+    <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1, event)"><i class="fa-solid fa-chevron-right"></i></button>
   </div>
 
   <!-- Main Content -->
@@ -52,7 +87,13 @@
             <div>
               <h2 class="listing-subtitle">Entire rental unit in <%= listing.location %>, <%= listing.country %>
               </h2>
-              <p class="listing-meta">4 guests · 2 bedrooms · 2 beds · 2 bathrooms</p>
+              <!-- Feature #23: Room Details -->
+              <p class="listing-meta">
+                <%= listing.maxGuests || 2 %> guest<%= (listing.maxGuests || 2) !== 1 ? 's' : '' %> ·
+                <%= listing.bedrooms || 1 %> bedroom<%= (listing.bedrooms || 1) !== 1 ? 's' : '' %> ·
+                <%= listing.beds || 1 %> bed<%= (listing.beds || 1) !== 1 ? 's' : '' %> ·
+                <%= listing.bathrooms || 1 %> bath<%= (listing.bathrooms || 1) !== 1 ? 's' : '' %>
+              </p>
             </div>
             <% if (listing.owner) { %>
               <div class="host-avatar">
@@ -70,7 +111,12 @@
         <div class="host-info-section mb-4">
           <h3 class="section-title">Hosted by <%= listing.owner ? listing.owner.username : 'Host' %>
           </h3>
-          <p class="text-muted">5 months hosting</p>
+          <p class="text-muted"><%= hostingSince %></p>
+          <% if (currUser && listing.owner && String(listing.owner._id) === String(currUser._id)) { %>
+            <a href="/listings/<%= listing._id %>/analytics" class="btn btn-outline-dark btn-sm mt-2">
+              <i class="fa-solid fa-chart-line me-1"></i> View Analytics
+            </a>
+          <% } %>
         </div>
 
         <hr class="my-4">
@@ -112,40 +158,105 @@
 
         <hr class="my-4">
 
-        <!-- Amenities -->
+        <!-- Feature #13: Amenities Section (Dynamic) -->
         <div class="amenities-section mb-4">
           <h3 class="section-title mb-3">What this place offers</h3>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="amenity-item">
-                <i class="fa-solid fa-kitchen-set"></i>
-                <span>Kitchen</span>
+          <% if (listing.amenities && listing.amenities.length > 0) { %>
+            <div class="row">
+              <% const amenityCols = [listing.amenities.slice(0, Math.ceil(listing.amenities.length/2)), listing.amenities.slice(Math.ceil(listing.amenities.length/2))]; %>
+              <% amenityCols.forEach(col => { %>
+                <div class="col-md-6">
+                  <% col.forEach(amenity => { %>
+                    <% const amenityInfo = AMENITIES_MAP[amenity]; %>
+                    <% if (amenityInfo) { %>
+                      <div class="amenity-item">
+                        <i class="<%= amenityInfo.icon %>"></i>
+                        <span><%= amenityInfo.label %></span>
+                      </div>
+                    <% } %>
+                  <% }) %>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <!-- Fallback: Show default amenities for older listings -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="amenity-item"><i class="fa-solid fa-kitchen-set"></i><span>Kitchen</span></div>
+                <div class="amenity-item"><i class="fa-solid fa-wifi"></i><span>Wifi</span></div>
+                <div class="amenity-item"><i class="fa-solid fa-square-parking"></i><span>Free parking on premises</span></div>
               </div>
-              <div class="amenity-item">
-                <i class="fa-solid fa-wifi"></i>
-                <span>Wifi</span>
-              </div>
-              <div class="amenity-item">
-                <i class="fa-solid fa-square-parking"></i>
-                <span>Free parking on premises</span>
+              <div class="col-md-6">
+                <div class="amenity-item"><i class="fa-solid fa-person-shelter"></i><span>Private patio or balcony</span></div>
+                <div class="amenity-item"><i class="fa-solid fa-dumbbell"></i><span>Shared gym in building</span></div>
+                <div class="amenity-item"><i class="fa-solid fa-elevator"></i><span>Lift</span></div>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="amenity-item">
-                <i class="fa-solid fa-person-shelter"></i>
-                <span>Private patio or balcony</span>
-              </div>
-              <div class="amenity-item">
-                <i class="fa-solid fa-dumbbell"></i>
-                <span>Shared gym in building</span>
-              </div>
-              <div class="amenity-item">
-                <i class="fa-solid fa-elevator"></i>
-                <span>Lift</span>
-              </div>
+          <% } %>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- Feature #16: Availability Calendar -->
+        <div class="calendar-section mb-4">
+          <h3 class="section-title mb-3">Availability</h3>
+          <div class="availability-calendar" id="availabilityCalendar">
+            <div class="calendar-header">
+              <button class="cal-nav-btn" id="calPrev"><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="cal-month-label" id="calMonthLabel"></span>
+              <button class="cal-nav-btn" id="calNext"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid">
+              <div class="cal-day-header">Sun</div>
+              <div class="cal-day-header">Mon</div>
+              <div class="cal-day-header">Tue</div>
+              <div class="cal-day-header">Wed</div>
+              <div class="cal-day-header">Thu</div>
+              <div class="cal-day-header">Fri</div>
+              <div class="cal-day-header">Sat</div>
+              <div class="cal-days" id="calDays"></div>
+            </div>
+            <div class="cal-legend mt-2">
+              <span class="cal-legend-item"><span class="cal-dot available"></span> Available</span>
+              <span class="cal-legend-item"><span class="cal-dot blocked"></span> Blocked</span>
+              <% if (listing.weekendPrice && listing.weekendPrice !== listing.price) { %>
+                <span class="cal-legend-item"><span class="cal-dot weekend"></span> Weekend rate</span>
+              <% } %>
             </div>
           </div>
-          <button class="btn btn-outline-dark mt-3 px-4 py-2" style="border-radius: 8px;">Show all 27 amenities</button>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="mb-4">
+          <h3 class="section-title mb-3">Price drop alerts</h3>
+          <% if (currUser) { %>
+            <form action="/listings/<%= listing._id %>/price-alert" method="POST" class="d-flex flex-wrap gap-2 align-items-center">
+              <input type="number" min="1" name="targetPrice" class="form-control" style="max-width: 220px;" placeholder="Target price in ₹" value="<%= userPriceAlert?.targetPrice || '' %>" required />
+              <button class="btn btn-dark btn-sm">Save Alert</button>
+            </form>
+            <% if (userPriceAlert) { %>
+              <form action="/listings/<%= listing._id %>/price-alert/remove" method="POST" class="mt-2">
+                <button class="btn btn-outline-secondary btn-sm">Remove Alert</button>
+                <span class="ms-2 small text-muted"><%= userPriceAlert.isTriggered ? 'Triggered 🎉' : 'Watching...' %></span>
+              </form>
+            <% } %>
+          <% } else { %>
+            <a class="btn btn-outline-dark btn-sm" href="/login">Login to set price alerts</a>
+          <% } %>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="mb-4">
+          <h3 class="section-title mb-3">Compare nearby options</h3>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-dark compare-add-btn" type="button" data-id="<%= listing._id %>">Add this listing</button>
+            <% comparisonCandidates.forEach(item => { %>
+              <button class="btn btn-sm btn-outline-dark compare-add-btn" type="button" data-id="<%= item._id %>"><%= item.title %></button>
+            <% }) %>
+            <button class="btn btn-sm btn-outline-primary" type="button" id="goCompareBtn">Open Comparison</button>
+          </div>
         </div>
 
         <hr class="my-4">
@@ -153,124 +264,72 @@
         <!-- Reviews -->
         <% if(listing.reviews.length> 0) { %>
           <div class="reviews-section mb-4">
-            <h3 class="section-title mb-4">★ 4.83 · <%= listing.reviews.length %> reviews</h3>
+            <h3 class="section-title mb-4">★ <%= avgRating %> · <%= listing.reviews.length %> review<%= listing.reviews.length !== 1 ? 's' : '' %></h3>
 
-            <!-- Overall Rating Breakdown -->
+            <!-- Overall Rating & Multi-Criteria Breakdown -->
             <div class="overall-rating-breakdown mb-5">
               <div class="row">
-                <!-- Left: Rating Bars -->
-                <div class="col-md-6">
+                <!-- Left: Overall distribution -->
+                <div class="col-md-5 mb-4 mb-md-0">
                   <div class="rating-bars">
-                    <div class="rating-bar-item">
-                      <span class="bar-label">Overall rating</span>
+                    <div class="rating-bar-item mb-2">
+                      <span class="bar-label fw-bold">Overall rating</span>
                     </div>
-                    <div class="rating-bar-item">
-                      <span class="bar-number">5</span>
-                      <div class="bar-container">
-                        <div class="bar-fill" style="width: 85%"></div>
+                    <% [5,4,3,2,1].forEach(num => { %>
+                      <div class="rating-bar-item">
+                        <span class="bar-number"><%= num %></span>
+                        <div class="bar-container">
+                          <div class="bar-fill" style="width: <%= ratingPercentages[num] %>%"></div>
+                        </div>
                       </div>
-                    </div>
-                    <div class="rating-bar-item">
-                      <span class="bar-number">4</span>
-                      <div class="bar-container">
-                        <div class="bar-fill" style="width: 12%"></div>
-                      </div>
-                    </div>
-                    <div class="rating-bar-item">
-                      <span class="bar-number">3</span>
-                      <div class="bar-container">
-                        <div class="bar-fill" style="width: 2%"></div>
-                      </div>
-                    </div>
-                    <div class="rating-bar-item">
-                      <span class="bar-number">2</span>
-                      <div class="bar-container">
-                        <div class="bar-fill" style="width: 1%"></div>
-                      </div>
-                    </div>
-                    <div class="rating-bar-item">
-                      <span class="bar-number">1</span>
-                      <div class="bar-container">
-                        <div class="bar-fill" style="width: 0%"></div>
-                      </div>
-                    </div>
+                    <% }) %>
                   </div>
                 </div>
-
-                <!-- Right: Category Ratings with Icons -->
-                <div class="col-md-6">
-                  <div class="category-ratings-grid">
-                    <div class="category-rating-item">
-                      <div class="category-icon">
-                        <i class="fa-solid fa-spray-can-sparkles"></i>
-                      </div>
-                      <div class="category-details">
-                        <div class="category-name">Cleanliness</div>
-                        <div class="category-rating-value">5.0</div>
-                      </div>
-                    </div>
-
-                    <div class="category-rating-item">
-                      <div class="category-icon">
-                        <i class="fa-solid fa-circle-check"></i>
-                      </div>
-                      <div class="category-details">
-                        <div class="category-name">Accuracy</div>
-                        <div class="category-rating-value">4.9</div>
-                      </div>
-                    </div>
-
-                    <div class="category-rating-item">
-                      <div class="category-icon">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                      </div>
-                      <div class="category-details">
-                        <div class="category-name">Check-in</div>
-                        <div class="category-rating-value">5.0</div>
-                      </div>
-                    </div>
-
-                    <div class="category-rating-item">
-                      <div class="category-icon">
-                        <i class="fa-solid fa-comment"></i>
-                      </div>
-                      <div class="category-details">
-                        <div class="category-name">Communication</div>
-                        <div class="category-rating-value">5.0</div>
-                      </div>
-                    </div>
-
-                    <div class="category-rating-item">
-                      <div class="category-icon">
-                        <i class="fa-solid fa-location-dot"></i>
-                      </div>
-                      <div class="category-details">
-                        <div class="category-name">Location</div>
-                        <div class="category-rating-value">4.5</div>
-                      </div>
-                    </div>
-
-                    <div class="category-rating-item">
-                      <div class="category-icon">
-                        <i class="fa-solid fa-tag"></i>
-                      </div>
-                      <div class="category-details">
-                        <div class="category-name">Value</div>
-                        <div class="category-rating-value">4.8</div>
-                      </div>
+                <!-- Right: Category rating progress bars -->
+                <div class="col-md-7">
+                  <div class="category-rating-bars">
+                    <% 
+                      const categories = [
+                        { key: "cleanliness", label: "Cleanliness", icon: "fa-solid fa-sparkles" },
+                        { key: "accuracy", label: "Accuracy", icon: "fa-solid fa-circle-check" },
+                        { key: "communication", label: "Communication", icon: "fa-solid fa-message" },
+                        { key: "location", label: "Location", icon: "fa-solid fa-map-pin" },
+                        { key: "value", label: "Value", icon: "fa-solid fa-tag" },
+                        { key: "checkIn", label: "Check-in", icon: "fa-solid fa-key" }
+                      ];
+                    %>
+                    <div class="row">
+                      <% categories.forEach(cat => { %>
+                        <div class="col-6 mb-3">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="category-bar-label small fw-semibold"><i class="<%= cat.icon %> me-2 text-muted"></i><%= cat.label %></span>
+                            <span class="category-bar-value small fw-bold"><%= categoryAverages[cat.key] %></span>
+                          </div>
+                          <div class="bar-container" style="height: 6px;">
+                            <div class="bar-fill bg-dark" style="width: <%= (categoryAverages[cat.key] / 5) * 100 %>%"></div>
+                          </div>
+                        </div>
+                      <% }) %>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Review Tags -->
-            <div class="review-tags mb-4">
-              <span class="review-tag">Great hospitality</span>
-              <span class="review-tag">Clean</span>
-              <span class="review-tag">Great communication</span>
-              <span class="review-tag">Quiet area</span>
-              <span class="review-tag">Well equipped</span>
+            <!-- Feature #46: AI Review Summary Container -->
+            <div class="ai-summary-container mb-5">
+              <div class="ai-summary-card p-4 border rounded-3 bg-light position-relative overflow-hidden" style="border-left: 4px solid #ff385c !important;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                  <div>
+                    <h5 class="fw-bold mb-1"><i class="fa-solid fa-wand-magic-sparkles text-danger me-2"></i>AI Review Summary</h5>
+                    <p class="text-muted small mb-0">Consolidated feedback summarized by Gemini AI</p>
+                  </div>
+                  <button id="summarizeReviewsBtn" class="btn btn-dark btn-sm px-3 rounded-pill">
+                    ✨ Generate Summary
+                  </button>
+                </div>
+                <div id="reviewSummaryContent" class="mt-3 text-secondary" style="display: none; line-height: 1.6; font-size: 0.95rem;"></div>
+              </div>
             </div>
 
             <hr class="my-4">
@@ -287,11 +346,28 @@
                       <div class="ms-2">
                         <h5 class="reviewer-name">
                           <%= review.author ? review.author.username : 'Anonymous' %>
+                          <% if (review.isVerifiedStay) { %>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size: 0.65rem; padding: 2px 6px; border-radius: 12px; font-weight: 600;">
+                              <i class="fa-solid fa-circle-check me-1"></i>Verified Stay
+                            </span>
+                          <% } %>
                         </h5>
-                        <p class="review-date text-muted">1 week ago</p>
+                        <p class="review-date text-muted">
+                          <%
+                            const reviewDate = new Date(review.createdAt);
+                            const diffMs = Date.now() - reviewDate.getTime();
+                            const diffDays = Math.floor(diffMs / 86400000);
+                            let timeAgo = 'Just now';
+                            if (diffDays >= 365) timeAgo = Math.floor(diffDays/365) + (Math.floor(diffDays/365)===1 ? ' year ago' : ' years ago');
+                            else if (diffDays >= 30) timeAgo = Math.floor(diffDays/30) + (Math.floor(diffDays/30)===1 ? ' month ago' : ' months ago');
+                            else if (diffDays >= 7) timeAgo = Math.floor(diffDays/7) + (Math.floor(diffDays/7)===1 ? ' week ago' : ' weeks ago');
+                            else if (diffDays >= 1) timeAgo = diffDays + (diffDays===1 ? ' day ago' : ' days ago');
+                          %>
+                          <%= timeAgo %>
+                        </p>
                       </div>
                     </div>
-                    <p class="starability-result" data-rating="<%= review.rating %>"></p>
+                    <p class="starability-result" data-rating="<%= Math.round(review.rating) %>"></p>
                     <p class="review-text">
                       <%= review.comment %>
                     </p>
@@ -327,65 +403,119 @@
               <hr class="my-4">
               <div class="review-form-section mb-5">
                 <h3 class="section-title mb-3">Leave a Review</h3>
-                <form action="/listings/<%= listing.id%>/reviews" method="POST" novalidate class="needs-validation">
-                  <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <fieldset class="starability-slot">
-                      <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked
-                        aria-label="No rating." />
-                      <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-                      <label for="first-rate1" title="Terrible">1 star</label>
-                      <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-                      <label for="first-rate2" title="Not good">2 stars</label>
-                      <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-                      <label for="first-rate3" title="Average">3 stars</label>
-                      <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-                      <label for="first-rate4" title="Very good">4 stars</label>
-                      <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-                      <label for="first-rate5" title="Amazing">5 stars</label>
-                    </fieldset>
+                
+                <% if (hasBooked || currUser.role === 'admin') { %>
+                  <form action="/listings/<%= listing.id%>/reviews" method="POST" novalidate class="needs-validation">
+                    <!-- Multi-criteria ratings grid -->
+                    <div class="row mb-4">
+                      <% 
+                        const criteriaList = [
+                          { name: "cleanliness", label: "Cleanliness" },
+                          { name: "accuracy", label: "Accuracy" },
+                          { name: "communication", label: "Communication" },
+                          { name: "location", label: "Location" },
+                          { name: "value", label: "Value" },
+                          { name: "checkIn", label: "Check-in" }
+                        ];
+                      %>
+                      <% criteriaList.forEach(crit => { %>
+                        <div class="col-md-6 mb-3 d-flex align-items-center justify-content-between">
+                          <label class="form-label mb-0 fw-semibold"><%= crit.label %></label>
+                          <fieldset class="starability-slot mb-0" style="min-height: auto;">
+                            <input type="radio" id="no-rate-<%= crit.name %>" class="input-no-rate" name="review[ratings][<%= crit.name %>]" value="5" checked aria-label="No rating." />
+                            <input type="radio" id="rate-<%= crit.name %>-1" name="review[ratings][<%= crit.name %>]" value="1" />
+                            <label for="rate-<%= crit.name %>-1" title="1 star">1 star</label>
+                            <input type="radio" id="rate-<%= crit.name %>-2" name="review[ratings][<%= crit.name %>]" value="2" />
+                            <label for="rate-<%= crit.name %>-2" title="2 stars">2 stars</label>
+                            <input type="radio" id="rate-<%= crit.name %>-3" name="review[ratings][<%= crit.name %>]" value="3" />
+                            <label for="rate-<%= crit.name %>-3" title="3 stars">3 stars</label>
+                            <input type="radio" id="rate-<%= crit.name %>-4" name="review[ratings][<%= crit.name %>]" value="4" />
+                            <label for="rate-<%= crit.name %>-4" title="4 stars">4 stars</label>
+                            <input type="radio" id="rate-<%= crit.name %>-5" name="review[ratings][<%= crit.name %>]" value="5" />
+                            <label for="rate-<%= crit.name %>-5" title="5 stars">5 stars</label>
+                          </fieldset>
+                        </div>
+                      <% }) %>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="comment" class="form-label">Comments</label>
+                      <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" placeholder="Write your honest experience here..." required></textarea>
+                      <div class="invalid-feedback">Please add some comments for review</div>
+                    </div>
+                    <button class="btn btn-dark px-4 py-2" style="border-radius: 8px;">Submit</button>
+                  </form>
+                <% } else { %>
+                  <!-- Friendly notice if they haven't booked -->
+                  <div class="alert alert-info border-0 rounded-3 p-4 d-flex align-items-center gap-3">
+                    <div class="fs-2 text-info"><i class="fa-solid fa-circle-info"></i></div>
+                    <div>
+                      <h6 class="fw-bold mb-1 text-info-emphasis">Only verified guests can review</h6>
+                      <p class="text-info-emphasis mb-0 small">To ensure review authenticity, you can only leave a review if you have booked and completed a stay at this property.</p>
+                    </div>
                   </div>
-                  <div class="mb-3">
-                    <label for="comment" class="form-label">Comments</label>
-                    <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control"
-                      required></textarea>
-                    <div class="invalid-feedback">Please add some comments for review</div>
-                  </div>
-                  <button class="btn btn-dark px-4 py-2" style="border-radius: 8px;">Submit</button>
-                </form>
+                <% } %>
               </div>
-              <% } %>
+            <% } %>
       </div>
 
-      <!-- Right Column - Booking Card -->
       <div class="col-lg-5">
         <div class="booking-card-sticky">
           <div class="booking-card">
             <div class="booking-card-header">
               <div class="price-section">
-                <span class="price">₹<%= listing.price.toLocaleString("en-IN") %></span>
-                <span class="price-unit">for 2 nights</span>
+                <span class="price" id="displayPrice">₹<%= listing.price.toLocaleString("en-IN") %></span>
+                <span class="price-unit">per night</span>
               </div>
+              <% if (listing.weekendPrice && listing.weekendPrice !== listing.price) { %>
+                <div class="weekend-price-tag">
+                  <small class="text-muted">Weekend: ₹<%= listing.weekendPrice.toLocaleString("en-IN") %>/night</small>
+                </div>
+              <% } %>
             </div>
 
             <div class="booking-form">
+              <%
+                const bookingToday = new Date();
+                const bookingTomorrow = new Date(bookingToday);
+                bookingTomorrow.setDate(bookingTomorrow.getDate() + 1);
+                const bookingDayAfter = new Date(bookingToday);
+                bookingDayAfter.setDate(bookingDayAfter.getDate() + 3);
+                const fmtDate = (d) => d.toISOString().split('T')[0];
+              %>
               <div class="date-guests-grid">
                 <div class="form-group">
                   <label>CHECK-IN</label>
-                  <input type="date" class="form-control" value="2026-01-16">
+                  <input type="date" class="form-control" id="checkInDate" value="<%= fmtDate(bookingTomorrow) %>" min="<%= fmtDate(bookingToday) %>">
                 </div>
                 <div class="form-group">
                   <label>CHECKOUT</label>
-                  <input type="date" class="form-control" value="2026-01-18">
+                  <input type="date" class="form-control" id="checkOutDate" value="<%= fmtDate(bookingDayAfter) %>" min="<%= fmtDate(bookingTomorrow) %>">
                 </div>
                 <div class="form-group full-width">
                   <label>GUESTS</label>
-                  <select class="form-control">
-                    <option>1 guest</option>
-                    <option>2 guests</option>
-                    <option>3 guests</option>
-                    <option>4 guests</option>
+                  <select class="form-control" id="guestCount">
+                    <% for (let g = 1; g <= (listing.maxGuests || 4); g++) { %>
+                      <option value="<%= g %>"><%= g %> guest<%= g !== 1 ? 's' : '' %></option>
+                    <% } %>
                   </select>
+                </div>
+              </div>
+
+              <!-- Feature #17: Dynamic Price Breakdown -->
+              <div class="price-breakdown mt-3" id="priceBreakdown">
+                <div class="price-line">
+                  <span>₹<%= listing.price.toLocaleString("en-IN") %> × <span id="nightCount"><%= dynamicPrice.nights %></span> night<span id="nightPlural"><%= dynamicPrice.nights !== 1 ? 's' : '' %></span></span>
+                  <span id="totalPriceDisplay">₹<%= dynamicPrice.totalPrice.toLocaleString("en-IN") %></span>
+                </div>
+                <div class="price-line">
+                  <span>Service fee</span>
+                  <span id="serviceFeeDisplay">₹<%= Math.round(dynamicPrice.totalPrice * 0.05).toLocaleString("en-IN") %></span>
+                </div>
+                <hr>
+                <div class="price-line price-total">
+                  <span><strong>Total</strong></span>
+                  <span id="grandTotalDisplay"><strong>₹<%= Math.round(dynamicPrice.totalPrice * 1.05).toLocaleString("en-IN") %></strong></span>
                 </div>
               </div>
 
@@ -404,7 +534,7 @@
                   <input type="radio" name="rate" id="refundable">
                   <label for="refundable">
                     <div class="rate-type">Refundable · ₹<%= listing.price.toLocaleString("en-IN") %> total</div>
-                    <div class="rate-desc">Free cancellation before 11 January. Cancel before check-in on 16 January for
+                    <div class="rate-desc">Free cancellation up to 5 days before check-in. Cancel before check-in for
                       a partial refund.</div>
                   </label>
                 </div>
@@ -436,7 +566,7 @@
   </div>
 
   <!-- Owner Actions -->
-  <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)) { %>
+  <% if(currUser && listing.owner && String(listing.owner._id) === String(currUser._id)) { %>
     <div class="container-fluid px-5 mb-5">
       <div class="owner-actions">
         <a href="/listings/<%=listing.id%>/edit" class="btn btn-dark me-2">Edit Listing</a>
@@ -458,6 +588,232 @@
       </script>
       <script src="/js/map.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+      <!-- Feature #9: Carousel & Lightbox Script -->
+      <script>
+        (function() {
+          // Feature #136: comparison basket
+          const selected = new Set();
+          document.querySelectorAll('.compare-add-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              if (selected.has(btn.dataset.id)) {
+                selected.delete(btn.dataset.id);
+                btn.classList.remove('btn-success');
+              } else {
+                if (selected.size >= 3) return;
+                selected.add(btn.dataset.id);
+                btn.classList.add('btn-success');
+              }
+            });
+          });
+          const goBtn = document.getElementById('goCompareBtn');
+          if (goBtn) {
+            goBtn.addEventListener('click', () => {
+              if (selected.size < 2) {
+                alert('Choose at least 2 listings.');
+                return;
+              }
+              window.location.href = `/listings/compare?ids=${[...selected].join(',')}`;
+            });
+          }
+        })();
+
+        // Carousel
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const dots = document.querySelectorAll('.carousel-dot');
+
+        function changeSlide(dir) {
+          if (slides.length === 0) return;
+          slides[currentSlide].classList.remove('active');
+          if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
+          currentSlide = (currentSlide + dir + slides.length) % slides.length;
+          slides[currentSlide].classList.add('active');
+          if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+        }
+
+        function goToSlide(index) {
+          if (slides.length === 0) return;
+          slides[currentSlide].classList.remove('active');
+          if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
+          currentSlide = index;
+          slides[currentSlide].classList.add('active');
+          if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+        }
+
+        // Lightbox
+        const allImageUrls = <%- JSON.stringify((listing.images && listing.images.length > 0 ? listing.images : [listing.image]).map(img => img.url)) %>;
+        let lightboxIndex = 0;
+
+        function openLightbox(index) {
+          lightboxIndex = index;
+          const overlay = document.getElementById('lightboxOverlay');
+          const img = document.getElementById('lightboxImage');
+          const counter = document.getElementById('lightboxCounter');
+          img.src = allImageUrls[lightboxIndex];
+          counter.textContent = `${lightboxIndex + 1} / ${allImageUrls.length}`;
+          overlay.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(e) {
+          if (e) e.stopPropagation();
+          document.getElementById('lightboxOverlay').style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+
+        function lightboxNav(dir, e) {
+          if (e) e.stopPropagation();
+          lightboxIndex = (lightboxIndex + dir + allImageUrls.length) % allImageUrls.length;
+          document.getElementById('lightboxImage').src = allImageUrls[lightboxIndex];
+          document.getElementById('lightboxCounter').textContent = `${lightboxIndex + 1} / ${allImageUrls.length}`;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+          const overlay = document.getElementById('lightboxOverlay');
+          if (overlay.style.display !== 'none') {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') lightboxNav(-1);
+            if (e.key === 'ArrowRight') lightboxNav(1);
+          }
+        });
+      </script>
+
+      <!-- Feature #16: Availability Calendar Script -->
+      <script>
+        (function() {
+          const listingId = '<%= listing._id %>';
+          const isOwner = <%= currUser && listing.owner && String(listing.owner._id) === String(currUser._id) ? 'true' : 'false' %>;
+          const basePrice = <%= listing.price %>;
+          const weekendPrice = <%= listing.weekendPrice || listing.price %>;
+          let blockedDates = [];
+          let calDate = new Date();
+
+          async function fetchBlockedDates() {
+            try {
+              const res = await fetch(`/listings/${listingId}/availability`);
+              const data = await res.json();
+              blockedDates = data.blockedDates || [];
+              renderCalendar();
+            } catch(e) {
+              console.error('Failed to fetch availability:', e);
+              renderCalendar();
+            }
+          }
+
+          function renderCalendar() {
+            const year = calDate.getFullYear();
+            const month = calDate.getMonth();
+            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            document.getElementById('calMonthLabel').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const container = document.getElementById('calDays');
+            container.innerHTML = '';
+
+            // Empty cells for offset
+            for (let i = 0; i < firstDay; i++) {
+              const empty = document.createElement('div');
+              empty.className = 'cal-day empty';
+              container.appendChild(empty);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+              const dateObj = new Date(year, month, d);
+              const dateStr = dateObj.toISOString().split('T')[0];
+              const isPast = dateObj < today;
+              const isBlocked = blockedDates.includes(dateStr);
+              const dayOfWeek = dateObj.getDay();
+              const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
+
+              const cell = document.createElement('div');
+              cell.className = 'cal-day';
+              if (isPast) cell.classList.add('past');
+              if (isBlocked) cell.classList.add('blocked');
+              if (isWeekend && !isBlocked && !isPast) cell.classList.add('weekend');
+
+              cell.innerHTML = `<span class="cal-day-num">${d}</span>`;
+              if (!isPast && isWeekend && weekendPrice !== basePrice) {
+                cell.innerHTML += `<span class="cal-price">₹${weekendPrice.toLocaleString('en-IN')}</span>`;
+              } else if (!isPast && !isBlocked) {
+                cell.innerHTML += `<span class="cal-price">₹${basePrice.toLocaleString('en-IN')}</span>`;
+              }
+
+              // Host can toggle blocked dates
+              if (isOwner && !isPast) {
+                cell.style.cursor = 'pointer';
+                cell.addEventListener('click', async () => {
+                  const action = isBlocked ? 'unblock' : 'block';
+                  try {
+                    await fetch(`/listings/${listingId}/availability?_method=PUT`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ date: dateStr, action })
+                    });
+                    await fetchBlockedDates();
+                  } catch(e) {
+                    console.error('Failed to update availability:', e);
+                  }
+                });
+              }
+
+              container.appendChild(cell);
+            }
+          }
+
+          document.getElementById('calPrev').addEventListener('click', () => {
+            calDate.setMonth(calDate.getMonth() - 1);
+            renderCalendar();
+          });
+          document.getElementById('calNext').addEventListener('click', () => {
+            calDate.setMonth(calDate.getMonth() + 1);
+            renderCalendar();
+          });
+
+          fetchBlockedDates();
+        })();
+      </script>
+
+      <!-- Feature #17: Dynamic Price Update Script -->
+      <script>
+        (function() {
+          const listingId = '<%= listing._id %>';
+          const checkInEl = document.getElementById('checkInDate');
+          const checkOutEl = document.getElementById('checkOutDate');
+
+          async function updatePrice() {
+            const checkIn = checkInEl.value;
+            const checkOut = checkOutEl.value;
+            if (!checkIn || !checkOut) return;
+
+            try {
+              const res = await fetch(`/listings/${listingId}/dynamic-price?checkIn=${checkIn}&checkOut=${checkOut}`);
+              const data = await res.json();
+
+              document.getElementById('nightCount').textContent = data.nights;
+              document.getElementById('nightPlural').textContent = data.nights !== 1 ? 's' : '';
+              document.getElementById('displayPrice').textContent = `₹${data.nightlyPrice.toLocaleString('en-IN')}`;
+              document.getElementById('totalPriceDisplay').textContent = `₹${data.totalPrice.toLocaleString('en-IN')}`;
+
+              const serviceFee = Math.round(data.totalPrice * 0.05);
+              document.getElementById('serviceFeeDisplay').textContent = `₹${serviceFee.toLocaleString('en-IN')}`;
+
+              const grandTotal = data.totalPrice + serviceFee;
+              document.getElementById('grandTotalDisplay').innerHTML = `<strong>₹${grandTotal.toLocaleString('en-IN')}</strong>`;
+            } catch(e) {
+              console.error('Failed to fetch dynamic price:', e);
+            }
+          }
+
+          if (checkInEl) checkInEl.addEventListener('change', updatePrice);
+          if (checkOutEl) checkOutEl.addEventListener('change', updatePrice);
+        })();
+      </script>
 
       <!-- AI Itinerary Script -->
       <script>
@@ -493,4 +849,42 @@
             btn.innerText = "✨ Regenerate Itinerary";
           }
         });
+      </script>
+
+      <!-- Feature #46: AI Review Summary Script -->
+      <script>
+        const summarizeBtn = document.getElementById('summarizeReviewsBtn');
+        if (summarizeBtn) {
+          summarizeBtn.addEventListener('click', async function () {
+            const btn = this;
+            const contentDiv = document.getElementById('reviewSummaryContent');
+
+            btn.disabled = true;
+            contentDiv.style.display = 'block';
+            contentDiv.innerHTML = `
+              <div class="d-flex align-items-center gap-2 py-2">
+                <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+                <span class="small">Generating summary with Gemini...</span>
+              </div>
+            `;
+
+            try {
+              const response = await fetch('/listings/<%= listing._id %>/review-summary', {
+                method: 'POST'
+              });
+              const data = await response.json();
+
+              if (data.summary) {
+                contentDiv.innerHTML = `<p class="mb-0">${data.summary}</p>`;
+              } else {
+                contentDiv.innerHTML = `<div class="text-danger small">Failed to generate review summary. Please try again.</div>`;
+              }
+            } catch (e) {
+              contentDiv.innerHTML = `<div class="text-danger small">Error connecting to AI service.</div>`;
+            } finally {
+              btn.disabled = false;
+              btn.innerText = "✨ Regenerate Summary";
+            }
+          });
+        }
       </script>

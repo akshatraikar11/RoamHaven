@@ -1,0 +1,33 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h2 class="mb-0">Wishlist</h2>
+    <a class="btn btn-sm btn-outline-dark" href="/listings">Browse listings</a>
+  </div>
+
+  <% if (!favorites || favorites.length === 0) { %>
+    <div class="alert alert-muted">No saved listings yet. Tap the heart on any listing to save it.</div>
+  <% } %>
+
+  <% if (favorites && favorites.length > 0) { %>
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-3">
+      <% favorites.forEach((listing) => { %>
+        <a href="/listings/<%= listing._id %>" class="text-decoration-none">
+          <div class="card h-100 shadow-sm border-0">
+            <img src="<%= listing.image?.url || '' %>" class="card-img-top" alt="listing_image" />
+            <div class="card-body">
+              <div class="fw-semibold"><%= listing.title %></div>
+              <div class="text-muted small"><%= listing.location || '' %>, <%= listing.country || '' %></div>
+              <div class="mt-2">
+                <span class="fw-semibold">₹<%= (listing.price || 0).toLocaleString("en-IN") %></span>
+                <span class="text-muted">/ night</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+

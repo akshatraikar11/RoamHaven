@@ -1,0 +1,133 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <h2 class="mb-0">Manage Coupons</h2>
+    <div class="text-muted small">Create discount codes for bookings.</div>
+  </div>
+
+  <div class="card shadow-sm mt-3">
+    <div class="card-body">
+      <h3 class="h5 mb-3">Create a coupon</h3>
+
+      <form action="/admin/coupons" method="POST" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Code</label>
+          <input class="form-control" name="code" placeholder="WELCOME20" required />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Discount Type</label>
+          <select class="form-select" name="discountType" required>
+            <option value="percentage">Percentage (%)</option>
+            <option value="flat">Flat (₹)</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Discount Value</label>
+          <input class="form-control" name="discountValue" type="number" min="0" required />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Max Discount (₹) (for percentage)</label>
+          <input class="form-control" name="maxDiscount" type="number" min="0" placeholder="e.g. 500" />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Min Booking Amount (₹)</label>
+          <input class="form-control" name="minBookingAmount" type="number" min="0" value="0" />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Usage Limit</label>
+          <input class="form-control" name="usageLimit" type="number" min="1" required />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Expiry Date</label>
+          <input class="form-control" name="expiresAt" type="date" required />
+        </div>
+
+        <div class="col-md-6 d-flex align-items-end">
+          <div class="form-check ms-md-2">
+            <input class="form-check-input" type="checkbox" name="isActive" value="true" checked id="isActive" />
+            <label class="form-check-label" for="isActive">Active</label>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-dark" type="submit">Create coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mt-4">
+    <div class="card-body">
+      <h3 class="h5 mb-3">Existing coupons</h3>
+
+      <% if (!coupons || coupons.length === 0) { %>
+        <div class="text-muted">No coupons yet.</div>
+      <% } %>
+
+      <% if (coupons && coupons.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Value</th>
+                <th>Min Amount</th>
+                <th>Expiry</th>
+                <th>Usage</th>
+                <th>Status</th>
+                <th style="width: 230px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% coupons.forEach((c) => { %>
+                <tr>
+                  <td class="fw-semibold"><%= c.code %></td>
+                  <td><%= c.discountType %></td>
+                  <td>
+                    <% if (c.discountType === "percentage") { %>
+                      <%= c.discountValue %>%
+                      <% if (c.maxDiscount != null) { %>
+                        (cap ₹<%= c.maxDiscount %>)
+                      <% } %>
+                    <% } else { %>
+                      ₹<%= c.discountValue %>
+                    <% } %>
+                  </td>
+                  <td>₹<%= c.minBookingAmount || 0 %></td>
+                  <td><%= c.expiresAt ? new Date(c.expiresAt).toLocaleDateString("en-IN") : "-" %></td>
+                  <td><%= c.usedCount || 0 %> / <%= c.usageLimit %></td>
+                  <td>
+                    <span class="badge <%= c.isActive ? 'bg-success' : 'bg-secondary' %>">
+                      <%= c.isActive ? 'active' : 'inactive' %>
+                    </span>
+                  </td>
+                  <td>
+                    <form action="/admin/coupons/<%= c._id %>/toggle?_method=PUT" method="POST" class="d-inline">
+                      <button class="btn btn-sm btn-outline-dark" type="submit">
+                        <%= c.isActive ? 'Deactivate' : 'Activate' %>
+                      </button>
+                    </form>
+                    <form action="/admin/coupons/<%= c._id %>?_method=DELETE" method="POST" class="d-inline ms-2">
+                      <button class="btn btn-sm btn-outline-danger" type="submit">
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+

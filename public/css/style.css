@@ -579,6 +579,7 @@ body {
 .tax-info {
   display: none;
 }
+
 /* ===== AIRBNB-STYLE LISTING SHOW PAGE ===== */
 
 /* Header */
@@ -626,6 +627,17 @@ body {
   height: 100%;
   object-fit: cover;
   border-radius: 12px 0 0 12px;
+}
+
+/* Single photo layout (when listing has only one image) */
+.photo-main.photo-single {
+  grid-column: 1 / -1;
+}
+
+.photo-main.photo-single img {
+  border-radius: 12px;
+  max-height: 480px;
+  object-fit: cover;
 }
 
 .photo-grid {
@@ -1532,7 +1544,7 @@ body {
   font-size: 0.875rem;
   color: #717171;
   margin-bottom: 4px;
-  
+
 }
 
 .listing-price {
@@ -1691,7 +1703,7 @@ body {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .rating-bars {
     padding-right: 0;
     margin-bottom: 2rem;
@@ -1742,4 +1754,1770 @@ body {
   background: linear-gradient(to right, #d90b47 0%, #c7094f 50%, #b90059 100%) !important;
   transform: scale(1.02);
   color: white !important;
+}
+
+/* ================================================
+   AUTH FEATURES — Navbar Account Dropdown
+   ================================================ */
+
+.nav-account-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 4px 12px 4px 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #222;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-account-btn:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #ccc;
+}
+
+.nav-account-btn::after {
+  font-size: 0.65rem;
+  margin-left: 2px;
+}
+
+.nav-avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff385c, #e03a45);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.nav-username {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.role-admin {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.role-host {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.account-dropdown {
+  min-width: 280px;
+  padding: 8px 0;
+  border-radius: 12px;
+  animation: dropdownFade 0.15s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.account-dropdown .dropdown-header {
+  padding: 12px 16px;
+}
+
+.dropdown-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff385c, #e03a45);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.account-dropdown .dropdown-item {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  transition: background 0.15s ease;
+}
+
+.account-dropdown .dropdown-item:hover {
+  background: #f7f7f7;
+}
+
+.account-dropdown .dropdown-item i {
+  width: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.account-dropdown .dropdown-item.text-danger i {
+  color: #dc3545;
+}
+
+.verify-prompt {
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.verify-prompt:hover {
+  background: #ffe69c;
+  color: #664d03;
+}
+
+/* ================================================
+   AUTH FEATURES — Verify Email Page
+   ================================================ */
+
+.verify-email-icon {
+  font-size: 4rem;
+  color: #ff385c;
+}
+
+.verify-steps {
+  text-align: left;
+  margin: 0 auto;
+  max-width: 320px;
+}
+
+.verify-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ff385c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.verify-step p {
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* ================================================
+   AUTH FEATURES — Account Pages (Sessions + Activity)
+   ================================================ */
+
+.account-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.account-nav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0;
+}
+
+.account-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #666;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.account-nav-link:hover {
+  color: #222;
+}
+
+.account-nav-link.active {
+  color: #222;
+  font-weight: 600;
+  border-bottom-color: #222;
+}
+
+/* Session Cards */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  background: white;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.session-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.session-current {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.session-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.session-current .session-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.session-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-device {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.session-badge-current {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #22c55e;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.session-details {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.session-dot {
+  color: #ccc;
+}
+
+.session-actions {
+  flex-shrink: 0;
+}
+
+.session-revoke-btn {
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 16px;
+}
+
+/* ================================================
+   AUTH FEATURES — Activity Log Table
+   ================================================ */
+
+.activity-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.activity-table thead th {
+  background: #fafafa;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  border-bottom: 1px solid #e8e8e8;
+  white-space: nowrap;
+}
+
+.activity-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s ease;
+}
+
+.activity-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.activity-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.activity-table td {
+  padding: 12px 16px;
+  white-space: nowrap;
+}
+
+.activity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.activity-badge-success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.activity-badge-failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.activity-datetime {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-date {
+  font-weight: 500;
+  color: #222;
+}
+
+.activity-time {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.activity-ip {
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+
+@media (max-width: 768px) {
+  .session-card {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .session-actions {
+    width: 100%;
+  }
+
+  .session-revoke-btn {
+    width: 100%;
+  }
+
+  .session-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .session-dot {
+    display: none;
+  }
+
+  .activity-table-wrapper {
+    font-size: 0.8rem;
+  }
+
+  .account-nav {
+    overflow-x: auto;
+  }
+}
+
+/* ================================================
+   Feature #9: Image Carousel & Lightbox
+   ================================================ */
+
+.photo-carousel-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 480px;
+}
+
+.photo-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+}
+
+.carousel-btn:hover {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.carousel-prev { left: 16px; }
+.carousel-next { right: 16px; }
+
+.carousel-dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.carousel-dot.active {
+  background: white;
+  transform: scale(1.2);
+}
+
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 10;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.lightbox-content {
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightbox-content img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.lightbox-counter {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.9rem;
+  margin-top: 12px;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 10;
+}
+
+.lightbox-nav:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.lightbox-prev { left: 24px; }
+.lightbox-next { right: 24px; }
+
+/* Card Carousel (index cards) */
+.card-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card-carousel-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-carousel-img.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.card-carousel-controls {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.card-img-container:hover .card-carousel-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-carousel-btn {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+  pointer-events: auto;
+}
+
+.card-carousel-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.card-carousel-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 3;
+}
+
+.card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transition: all 0.2s;
+}
+
+.card-dot.active {
+  background: white;
+}
+
+/* ================================================
+   Feature #11 & #15: Advanced Filters & Sort
+   ================================================ */
+
+.advanced-filters-bar {
+  padding: 12px 0;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.filter-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.filter-pill-btn:hover {
+  border-color: #222;
+  background: #f7f7f7;
+}
+
+.filter-pill-btn::after {
+  display: none !important;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #222;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.filter-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: #717171;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.filter-clear-btn:hover {
+  color: #222;
+}
+
+.active-filter-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #f0f0f0;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  color: #222;
+}
+
+.active-badge a {
+  color: #717171;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.active-badge a:hover {
+  color: #222;
+}
+
+/* Filter Modal */
+.filter-modal-content {
+  border-radius: 16px;
+  border: none;
+}
+
+.filter-modal-content .modal-header {
+  padding: 20px 24px 0;
+}
+
+.filter-modal-content .modal-body {
+  padding: 20px 24px;
+}
+
+.filter-modal-content .modal-footer {
+  padding: 0 24px 20px;
+}
+
+/* Amenities Filter Grid */
+.amenities-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.amenity-filter-chip {
+  cursor: pointer;
+}
+
+.amenity-filter-chip input[type="checkbox"] {
+  display: none;
+}
+
+.amenity-filter-chip .amenity-chip-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.amenity-filter-chip input:checked + .amenity-chip-inner {
+  border-color: #222;
+  background: #f7f7f7;
+  font-weight: 600;
+}
+
+.amenity-filter-chip .amenity-chip-inner i {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+  color: #555;
+}
+
+/* Rating Filter */
+.rating-filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rating-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rating-filter-option:hover {
+  border-color: #222;
+}
+
+.rating-filter-option input[type="radio"] {
+  accent-color: #222;
+}
+
+.rating-stars i {
+  color: #ffc107;
+  font-size: 0.9rem;
+}
+
+.results-info {
+  font-size: 0.9rem;
+}
+
+.no-results-container {
+  padding: 60px 20px;
+}
+
+.no-results-container i {
+  display: block;
+}
+
+/* ================================================
+   Feature #13: Amenities Chip Grid (New/Edit forms)
+   ================================================ */
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.amenity-chip {
+  cursor: pointer;
+}
+
+.amenity-chip input[type="checkbox"] {
+  display: none;
+}
+
+.amenity-chip .amenity-chip-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #444;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.amenity-chip .amenity-chip-inner:hover {
+  border-color: #999;
+}
+
+.amenity-chip input:checked + .amenity-chip-inner {
+  border-color: #222;
+  background: #f0f0f0;
+  color: #222;
+  font-weight: 600;
+}
+
+.amenity-chip .amenity-chip-inner i {
+  font-size: 1.1rem;
+  width: 22px;
+  text-align: center;
+}
+
+/* ================================================
+   Feature #23: Room Details Section
+   ================================================ */
+
+.room-details-section {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e8e8e8;
+}
+
+.room-details-section h5 {
+  font-weight: 700;
+  color: #222;
+}
+
+.counter-input {
+  max-width: 60px;
+}
+
+.listing-room-info {
+  font-size: 0.8rem;
+  color: #717171;
+  margin-bottom: 2px;
+}
+
+/* ================================================
+   Feature #9: Image Preview (New/Edit forms)
+   ================================================ */
+
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.image-preview-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.image-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* Edit page existing images */
+.existing-images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.existing-image-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.existing-image-item img {
+  display: block;
+  border-radius: 8px;
+}
+
+.delete-img-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.existing-image-item:hover .delete-img-btn {
+  opacity: 1;
+}
+
+/* Weekend tag on cards */
+.weekend-tag {
+  font-size: 0.7rem;
+  color: #717171;
+  margin-left: 6px;
+  padding: 2px 6px;
+  background: #f7f7f7;
+  border-radius: 4px;
+}
+
+/* ================================================
+   Feature #16: Availability Calendar
+   ================================================ */
+
+.availability-calendar {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cal-month-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.cal-nav-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+
+.cal-nav-btn:hover {
+  background: #f7f7f7;
+  border-color: #222;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-day-header {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #717171;
+  padding: 8px 0;
+  text-transform: uppercase;
+}
+
+.cal-days {
+  display: contents;
+}
+
+.cal-day {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: all 0.2s;
+}
+
+.cal-day.empty {
+  background: transparent;
+}
+
+.cal-day.past {
+  opacity: 0.3;
+}
+
+.cal-day.blocked {
+  background: #fee2e2;
+  text-decoration: line-through;
+  color: #dc2626;
+}
+
+.cal-day.weekend {
+  background: #fffbeb;
+}
+
+.cal-day:not(.past):not(.empty):hover {
+  background: #f0f0f0;
+}
+
+.cal-day-num {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #222;
+}
+
+.cal-price {
+  font-size: 0.6rem;
+  color: #717171;
+}
+
+.cal-legend {
+  display: flex;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #717171;
+}
+
+.cal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.cal-dot.available {
+  background: #e8e8e8;
+}
+
+.cal-dot.blocked {
+  background: #fee2e2;
+}
+
+.cal-dot.weekend {
+  background: #fffbeb;
+  border: 1px solid #fbbf24;
+}
+
+/* ================================================
+   Feature #17: Dynamic Pricing Display
+   ================================================ */
+
+.price-breakdown {
+  border-top: 1px solid #ebebeb;
+  padding-top: 12px;
+}
+
+.price-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.price-total {
+  font-size: 1rem;
+}
+
+.weekend-price-tag {
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+/* ================================================
+   Feature #19: Analytics Page
+   ================================================ */
+
+.analytics-card {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.analytics-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.analytics-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.analytics-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #222;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.analytics-label {
+  font-size: 0.85rem;
+  color: #717171;
+  font-weight: 500;
+}
+
+.analytics-panel {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* Funnel */
+.funnel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.funnel-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.funnel-bar-container {
+  flex: 1;
+}
+
+.funnel-bar {
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  min-width: 40px;
+  transition: width 0.5s ease;
+}
+
+.funnel-bar-label {
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.funnel-step-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #222;
+  min-width: 70px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+/* Tips */
+.tip-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+}
+
+.tip-card i {
+  font-size: 1.25rem;
+  margin-top: 2px;
+}
+
+/* ================================================
+   Responsive for new features
+   ================================================ */
+
+@media (max-width: 768px) {
+  .photo-carousel-container {
+    height: 300px;
+  }
+
+  .advanced-filters-bar {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .amenities-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .amenities-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-grid {
+    font-size: 0.8rem;
+  }
+
+  .cal-day {
+    min-height: 40px;
+    padding: 4px 2px;
+  }
+
+  .cal-price {
+    display: none;
+  }
+
+  .analytics-value {
+    font-size: 1.5rem;
+  }
+
+  .lightbox-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .lightbox-prev { left: 8px; }
+  .lightbox-next { right: 8px; }
+}
+
+/* ================================================
+   Feature #41 & #46: Review Upgrades
+   ================================================ */
+
+.category-rating-bars {
+  padding-left: 1rem;
+}
+
+.category-bar-label {
+  display: flex;
+  align-items: center;
+  color: #222;
+}
+
+.category-bar-label i {
+  width: 16px;
+  text-align: center;
+}
+
+.category-bar-value {
+  color: #222;
+}
+
+/* AI Summary Card styling */
+.ai-summary-card {
+  background-color: #faf5f6 !important;
+  border-color: #f7e6e8 !important;
+}
+
+#reviewSummaryContent {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Starability slot tweaks for multi-criteria grid */
+.starability-slot label {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .category-rating-bars {
+    padding-left: 0;
+  }
+  
+  .review-form-section .col-md-6 {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+}
+
+/* ================================================
+   Feature #34-38: Payments, coupons, wallet UI
+   ================================================ */
+
+.wallet-badge {
+  background: #ff385c;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.wallet-balance-card {
+  background: linear-gradient(135deg, #faf5f6 0%, #fff 100%);
+}
+
+.wallet-balance-amount {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.coupon-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.coupon-row #couponMessage {
+  min-height: 18px;
+}
+
+.booking-section .continue-btn {
+  transition: transform 0.15s ease;
+}
+
+.booking-section .continue-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.wallet-toggle {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fafafa;
+}
+
+.coupon-discount-row .price-value {
+  color: #dc3545;
+}
+
+.wallet-discount-row .price-value {
+  color: #0d6efd;
+}
+
+/* ================================================
+   Feature #90-95, #100: Premium UI/UX Layer
+   ================================================ */
+
+.page-transition-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 3000;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.page-transition-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+body {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+body.page-ready {
+  opacity: 1;
+}
+
+.hero-landing {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #efefef;
+  border-radius: 18px;
+  background: radial-gradient(circle at 20% 20%, #fff3f6 0%, #ffffff 55%);
+  padding: 2.5rem 2rem;
+}
+
+.hero-bg-glow {
+  position: absolute;
+  right: -50px;
+  top: -50px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 56, 92, 0.12);
+  filter: blur(28px);
+  animation: floatGlow 5.5s ease-in-out infinite;
+}
+
+@keyframes floatGlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(12px); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+  font-weight: 800;
+  color: #1c1c1c;
+  margin-bottom: 0.6rem;
+}
+
+.hero-subtitle {
+  max-width: 780px;
+  color: #5b5b5b;
+  margin-bottom: 1.2rem;
+}
+
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.hero-stat {
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.hero-stat-number {
+  display: block;
+  font-size: 1.3rem;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #ff385c;
+}
+
+.hero-stat-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6a6a6a;
+}
+
+.listing-skeleton-card.is-loading {
+  pointer-events: none;
+}
+
+.listing-skeleton-card.is-loading .card-img-top,
+.listing-skeleton-card.is-loading .card-carousel-img.active {
+  opacity: 0;
+}
+
+.listing-skeleton-card.is-loading .card-img-container,
+.listing-skeleton-card.is-loading .listing-title,
+.listing-skeleton-card.is-loading .listing-subtitle,
+.listing-skeleton-card.is-loading .listing-room-info,
+.listing-skeleton-card.is-loading .listing-price {
+  position: relative;
+  overflow: hidden;
+  background: #ececec;
+  color: transparent !important;
+  border-radius: 8px;
+}
+
+.listing-skeleton-card.is-loading .listing-title::after,
+.listing-skeleton-card.is-loading .listing-subtitle::after,
+.listing-skeleton-card.is-loading .listing-room-info::after,
+.listing-skeleton-card.is-loading .listing-price::after,
+.listing-skeleton-card.is-loading .card-img-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: shimmer 1.15s infinite;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.fav-heart-btn.heart-pop {
+  animation: heartPop 0.3s ease;
+}
+
+.fav-heart.heart-active {
+  color: #ff385c !important;
+}
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+
+.toast-stack {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.app-toast {
+  min-width: 280px;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #ececec;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 12px 12px;
+  transform: translateY(10px);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.app-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.app-toast-success .toast-icon {
+  color: #16a34a;
+}
+
+.app-toast-error .toast-icon {
+  color: #dc2626;
+}
+
+.toast-body-text {
+  flex: 1;
+  font-size: 0.88rem;
+  color: #222;
+}
+
+.toast-close-btn {
+  border: none;
+  background: transparent;
+  color: #6b6b6b;
+}
+
+@media (max-width: 992px) {
+  .container {
+    padding: 1.2rem 1.2rem 5rem;
+  }
+
+  .navbar-search-container {
+    position: static;
+    transform: none;
+    margin: 0.5rem 0;
+    width: 100%;
+    order: 3;
+  }
+
+  .search-bar-pill {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  #filters {
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .tax-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-landing {
+    padding: 1.4rem 1rem;
+  }
+
+  .hero-stat {
+    min-width: 140px;
+    flex: 1;
+  }
+
+  .toast-stack {
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+  }
+
+  .app-toast {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+  }
 }

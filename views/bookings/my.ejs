@@ -1,0 +1,98 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h2 class="mb-0">
+      <%= mode === "host" ? "Host Bookings" : "My Bookings" %>
+    </h2>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-sm btn-outline-dark" href="/bookings/my">Guest view</a>
+      <a class="btn btn-sm btn-outline-dark" href="/bookings/host">Host view</a>
+      <a class="btn btn-sm btn-outline-secondary" href="/bookings/history">Payments</a>
+    </div>
+  </div>
+
+  <% if (!bookings || bookings.length === 0) { %>
+    <div class="alert alert-muted">No bookings yet.</div>
+  <% } %>
+
+  <% if (bookings && bookings.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Listing</th>
+            <% if (mode === "host") { %><th>Guest</th><% } %>
+            <th>Status</th>
+            <th>Amount</th>
+            <th style="width: 260px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bookings.forEach((b) => { %>
+            <tr>
+              <td><%= b.createdAt ? new Date(b.createdAt).toLocaleDateString("en-IN") : "-" %></td>
+              <td>
+                <div class="fw-semibold"><%= b.listing?.title || "Listing" %></div>
+                <div class="text-muted small">
+                  <%= b.startDate ? new Date(b.startDate).toLocaleDateString("en-IN") : "" %>
+                  →
+                  <%= b.endDate ? new Date(b.endDate).toLocaleDateString("en-IN") : "" %>
+                </div>
+              </td>
+              <% if (mode === "host") { %>
+                <td>
+                  <div class="fw-semibold"><%= b.user?.username || "-" %></div>
+                  <div class="text-muted small"><%= b.user?.email || "" %></div>
+                </td>
+              <% } %>
+              <td>
+                <% let badgeClass = "bg-secondary";
+                  if (b.status === "confirmed") badgeClass = "bg-success";
+                  else if (b.status === "checked_in") badgeClass = "bg-primary";
+                  else if (b.status === "completed") badgeClass = "bg-dark";
+                  else if (b.status === "cancelled") badgeClass = "bg-danger";
+                %>
+                <span class="badge <%= badgeClass %>"><%= b.status %></span>
+              </td>
+              <td>
+                ₹<%= Math.round((b.totalAmount || b.payment?.amount || 0) / 100).toLocaleString("en-IN") %>
+              </td>
+              <td>
+                <div class="d-flex flex-wrap gap-2">
+                  <a class="btn btn-sm btn-outline-secondary" href="/bookings/<%= b._id %>/success">Details</a>
+                  <a class="btn btn-sm btn-outline-dark" href="/bookings/<%= b._id %>/receipt.pdf">Receipt (PDF)</a>
+
+                  <% if (mode === "host") { %>
+                    <% if (b.status === "confirmed") { %>
+                      <form action="/bookings/<%= b._id %>/status" method="POST" class="d-inline">
+                        <input type="hidden" name="status" value="checked_in" />
+                        <button class="btn btn-sm btn-primary" type="submit">Mark checked-in</button>
+                      </form>
+                    <% } %>
+
+                    <% if (b.status === "checked_in") { %>
+                      <form action="/bookings/<%= b._id %>/status" method="POST" class="d-inline">
+                        <input type="hidden" name="status" value="completed" />
+                        <button class="btn btn-sm btn-dark" type="submit">Complete</button>
+                      </form>
+                    <% } %>
+                  <% } else { %>
+                    <% if (b.status === "pending" || b.status === "confirmed") { %>
+                      <form action="/bookings/<%= b._id %>/status" method="POST" class="d-inline">
+                        <input type="hidden" name="status" value="cancelled" />
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+                      </form>
+                    <% } %>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+

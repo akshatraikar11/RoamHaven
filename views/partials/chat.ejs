@@ -37,9 +37,9 @@
       I can help you with:<br>
       🏠 Find listings by location<br>
       💰 Check prices & budgets<br>
-      📅 Booking assistance<br>
+      📅 Book stays conversationally<br>
       📞 Customer support<br><br>
-      Try asking: "Show me places in Nashik" or "How do I book?"
+      Try: "Book me in Nashik for 2 nights this weekend under ₹3000"
     </div>
   </div>
 
@@ -64,6 +64,7 @@
   const jarvisSend = document.getElementById("jarvis-send");
   const jarvisChat = document.getElementById("jarvis-chat");
   const jarvisInput = document.getElementById("jarvis-input");
+  const chatHistory = [];
 
   // Toggle Chat
   jarvisBtn.onclick = () => {
@@ -89,13 +90,17 @@
     if (!userText) return;
 
     // Add User Message
+    // SECURITY: use textContent, not innerHTML — this is raw user input and
+    // was previously rendered as HTML, letting anyone execute script in their
+    // own browser just by typing it (e.g. <img src=x onerror=alert(1)>).
     const userMsg = document.createElement("div");
     userMsg.className = "msg-bubble msg-user";
-    userMsg.innerHTML = userText;
+    userMsg.textContent = userText;
     jarvisChat.appendChild(userMsg);
 
     jarvisInput.value = "";
     jarvisChat.scrollTop = jarvisChat.scrollHeight;
+    chatHistory.push({ role: "user", content: userText });
 
     // Add Loading Bubble
     const loadingMsg = document.createElement("div");
@@ -108,17 +113,36 @@
       const response = await fetch("/api/jarvis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText }),
+        body: JSON.stringify({ message: userText, history: chatHistory }),
       });
 
       const data = await response.json();
       const reply = data.reply || "I'm having a bit of trouble connecting right now.";
 
       // Replace Loading with Reply
-      loadingMsg.innerHTML = reply;
+      // SECURITY: `reply` is partly AI-generated text — never trust it as HTML.
+      // Render as plain text, then append any link the server sent as
+      // structured {url, label} data using safe DOM APIs (no innerHTML).
+      loadingMsg.textContent = "";
+      loadingMsg.appendChild(document.createTextNode(reply));
+      if (data.link && data.link.url) {
+        loadingMsg.appendChild(document.createElement("br"));
+        const linkEl = document.createElement("a");
+        linkEl.href = data.link.url;
+        linkEl.textContent = data.link.label || "View";
+        linkEl.className = "btn btn-sm btn-primary mt-2";
+        loadingMsg.appendChild(linkEl);
+      }
+      chatHistory.push({ role: "assistant", content: reply });
+
+      if (data.redirectUrl) {
+        setTimeout(() => {
+          window.location.href = data.redirectUrl;
+        }, 1200);
+      }
 
     } catch (err) {
-      loadingMsg.innerHTML = "Sorry, I couldn't reach the server.";
+      loadingMsg.textContent = "Sorry, I couldn't reach the server.";
     }
   };
 

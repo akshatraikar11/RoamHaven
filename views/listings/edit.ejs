@@ -11,30 +11,69 @@
         </div>
         <div class="mb-3">
           <label for="description" class="form-label">Description</label>
-          <textarea name="listing[description]" class="form-control" required>
+          <div class="d-flex gap-2 mb-2">
+            <button type="button" class="btn btn-outline-dark btn-sm" id="aiGenerateDescriptionBtn">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate with AI
+            </button>
+            <span class="small text-muted align-self-center" id="aiDescriptionStatus"></span>
+          </div>
+          <textarea name="listing[description]" class="form-control" id="listingDescription" required>
              <%= listing.description %>
               </textarea>
           <div class="invalid-feedback">Please enter a short description</div>
         </div>
 
+        <!-- Feature #9: Existing Images Gallery -->
         <div class="mb-3">
-          Original Listing Image <br>
-          <img src="<%= originalImageUrl %>" />
+          <label class="form-label">Current Images</label>
+          <div class="existing-images-grid" id="existingImagesGrid">
+            <% if (listing.images && listing.images.length > 0) { %>
+              <% listing.images.forEach((img, i) => { %>
+                <div class="existing-image-item" id="img-<%= img.filename %>">
+                  <img src="<%= img.url.replace('/upload', '/upload/h_150,w_200,c_fill') %>" alt="Image <%= i+1 %>" />
+                  <% if (listing.image && listing.image.filename === img.filename) { %>
+                    <span class="cover-badge">Cover</span>
+                  <% } %>
+                  <button type="button" class="delete-img-btn" onclick="deleteImage('<%= listing._id %>', '<%= img.filename %>', this)">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="existing-image-item">
+                <img src="<%= originalImageUrl %>" alt="Current image" />
+                <span class="cover-badge">Cover</span>
+              </div>
+            <% } %>
+          </div>
         </div>
 
         <div class="mb-3">
-          <label for="image" class="form-label">Upload New Image</label>
-          <input name="listing[image]" type="file" class="form-control" />
+          <label for="image" class="form-label">Upload New Images <span class="text-muted">(adds to existing)</span></label>
+          <input name="listing[image]" type="file" class="form-control" multiple accept="image/*" id="editImageUploadInput" />
+          <div class="image-preview-container mt-2" id="editImagePreviewContainer"></div>
         </div>
 
         <div class="row">
-          <div class="mb-3 col-md-4">
+          <div class="mb-3 col-md-3">
             <label for="price" class="form-label">Price</label>
             <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required />
             <div class="invalid-feedback">Please enter a valid Price</div>
           </div>
 
-          <div class="mb-3 col-md-8">
+          <!-- Feature #17: Weekend Price -->
+          <div class="mb-3 col-md-3">
+            <label for="weekendPrice" class="form-label">Weekend Price</label>
+            <input name="listing[weekendPrice]" value="<%= listing.weekendPrice || '' %>" type="number" class="form-control" />
+            <small class="text-muted">Fri & Sat nights</small>
+          </div>
+          <div class="mb-3 col-md-3">
+            <label for="surgeMultiplier" class="form-label">Surge Multiplier</label>
+            <input name="listing[surgeMultiplier]" value="<%= listing.surgeMultiplier || 1 %>" type="number" min="1" step="0.05" class="form-control" />
+            <small class="text-muted">Demand surge multiplier</small>
+          </div>
+
+          <div class="mb-3 col-md-6">
             <label for="country" class="form-label">Country</label>
             <input name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required />
             <div class="invalid-feedback">Country name should be valid</div>
@@ -55,7 +94,7 @@
             <option value="camping" <%=listing.category==='camping' ? 'selected' : '' %>>Camping</option>
             <option value="farms" <%=listing.category==='farms' ? 'selected' : '' %>>Farms</option>
             <option value="arctic" <%=listing.category==='arctic' ? 'selected' : '' %>>Arctic</option>
-            <option value="pg_hostel" <%=listing.category==='pg_hostel' ? 'selected' : '' %>>PG Hostel</option>
+            <option value="pg_hostel" <%=listing.category==='pg_hostel' ? 'selected' : '' %>>PGs, Hostels & Co-Living</option>
           </select>
           <div class="invalid-feedback">Please select a category</div>
         </div>
@@ -66,7 +105,151 @@
           <div class="invalid-feedback">location should be valid</div>
         </div>
 
+        <!-- Feature #23: Room Details -->
+        <div class="room-details-section mb-4">
+          <h5 class="mb-3"><i class="fa-solid fa-bed me-2"></i>Room Details</h5>
+          <div class="row">
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Max Guests</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="maxGuests" data-action="dec">−</button>
+                <input name="listing[maxGuests]" type="number" class="form-control text-center counter-input" value="<%= listing.maxGuests || 2 %>" min="1" max="50" id="maxGuests" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="maxGuests" data-action="inc">+</button>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Bedrooms</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bedrooms" data-action="dec">−</button>
+                <input name="listing[bedrooms]" type="number" class="form-control text-center counter-input" value="<%= listing.bedrooms || 1 %>" min="0" max="50" id="bedrooms" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bedrooms" data-action="inc">+</button>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Bathrooms</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bathrooms" data-action="dec">−</button>
+                <input name="listing[bathrooms]" type="number" class="form-control text-center counter-input" value="<%= listing.bathrooms || 1 %>" min="0" max="50" id="bathrooms" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="bathrooms" data-action="inc">+</button>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <label class="form-label">Beds</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="beds" data-action="dec">−</button>
+                <input name="listing[beds]" type="number" class="form-control text-center counter-input" value="<%= listing.beds || 1 %>" min="0" max="50" id="beds" />
+                <button type="button" class="btn btn-outline-secondary counter-btn" data-target="beds" data-action="inc">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature #13: Amenities System -->
+        <div class="amenities-select-section mb-4">
+          <h5 class="mb-3"><i class="fa-solid fa-sparkles me-2"></i>Amenities</h5>
+          <div class="amenities-grid">
+            <% for (let [key, val] of Object.entries(AMENITIES_MAP)) { %>
+              <label class="amenity-chip" for="edit-amenity-<%= key %>">
+                <input type="checkbox" name="listing[amenities]" value="<%= key %>" id="edit-amenity-<%= key %>"
+                  <%= listing.amenities && listing.amenities.includes(key) ? 'checked' : '' %> />
+                <span class="amenity-chip-inner">
+                  <i class="<%= val.icon %>"></i>
+                  <span><%= val.label %></span>
+                </span>
+              </label>
+            <% } %>
+          </div>
+        </div>
+
         <button class="btn btn-dark edit-btn mt-3">Edit</button>
       </form>
     </div>
   </div>
+
+  <script>
+    // Counter buttons for room details
+    document.querySelectorAll('.counter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.target);
+        const min = parseInt(target.min) || 0;
+        const max = parseInt(target.max) || 50;
+        let val = parseInt(target.value) || 0;
+        if (btn.dataset.action === 'inc' && val < max) target.value = val + 1;
+        if (btn.dataset.action === 'dec' && val > min) target.value = val - 1;
+      });
+    });
+
+    // Image preview for new uploads
+    const editInput = document.getElementById('editImageUploadInput');
+    if (editInput) {
+      editInput.addEventListener('change', function() {
+        const container = document.getElementById('editImagePreviewContainer');
+        container.innerHTML = '';
+        const files = Array.from(this.files).slice(0, 10);
+        files.forEach((file, i) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = 'image-preview-item';
+            div.innerHTML = `<img src="${e.target.result}" alt="Preview ${i+1}" />`;
+            container.appendChild(div);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+
+    // Delete existing image
+    async function deleteImage(listingId, filename, btn) {
+      if (!confirm('Delete this image?')) return;
+      try {
+        const res = await fetch(`/listings/${listingId}/delete-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const item = document.getElementById(`img-${filename}`);
+          if (item) item.remove();
+        }
+      } catch (e) {
+        console.error('Error deleting image:', e);
+      }
+    }
+
+    document.getElementById('aiGenerateDescriptionBtn')?.addEventListener('click', async () => {
+      const statusEl = document.getElementById('aiDescriptionStatus');
+      const descEl = document.getElementById('listingDescription');
+      const amenities = Array.from(document.querySelectorAll('input[name="listing[amenities]"]:checked'))
+        .map((el) => el.value);
+
+      statusEl.textContent = 'Generating...';
+      try {
+        const res = await fetch('/api/ai/generate-description', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: document.querySelector('[name="listing[title]"]')?.value,
+            location: document.querySelector('[name="listing[location]"]')?.value,
+            country: document.querySelector('[name="listing[country]"]')?.value,
+            category: document.querySelector('[name="listing[category]"]')?.value,
+            price: document.querySelector('[name="listing[price]"]')?.value,
+            bedrooms: document.querySelector('[name="listing[bedrooms]"]')?.value,
+            bathrooms: document.querySelector('[name="listing[bathrooms]"]')?.value,
+            maxGuests: document.querySelector('[name="listing[maxGuests]"]')?.value,
+            amenities,
+          }),
+        });
+        const data = await res.json();
+        if (data?.success && data.description) {
+          descEl.value = data.description.trim();
+          statusEl.textContent = 'Description generated.';
+        } else {
+          statusEl.textContent = data?.error || 'Could not generate description.';
+        }
+      } catch (_) {
+        statusEl.textContent = 'AI request failed.';
+      }
+    });
+  </script>

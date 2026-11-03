@@ -1,0 +1,62 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h2 class="mb-0">Wallet</h2>
+    <div class="text-muted small">
+      Balance is stored as virtual INR (not connected to bank payouts).
+    </div>
+  </div>
+
+  <div class="card shadow-sm wallet-balance-card">
+    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="text-muted small">Current balance</div>
+        <div class="wallet-balance-amount">
+          ₹<%= Math.floor((wallet.balance || 0) / 100).toLocaleString("en-IN") %>
+        </div>
+      </div>
+      <a class="btn btn-outline-dark" href="/bookings/history">Payment history</a>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <h3 class="h5 mb-3">Transactions</h3>
+
+    <% if (!wallet.transactions || wallet.transactions.length === 0) { %>
+      <div class="alert alert-muted">No wallet transactions yet.</div>
+    <% } %>
+
+    <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% wallet.transactions.forEach((t) => { %>
+              <tr>
+                <td><%= t.createdAt ? new Date(t.createdAt).toLocaleDateString("en-IN") : "-" %></td>
+                <td>
+                  <% let badge = t.type === "credit" ? "bg-success" : "bg-danger"; %>
+                  <span class="badge <%= badge %>"><%= t.type %></span>
+                </td>
+                <td class="text-muted"><%= t.description %></td>
+                <td>
+                  <% const rupees = Math.round((t.amount || 0) / 100); %>
+                  ₹<%= rupees.toLocaleString("en-IN") %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+

@@ -1,0 +1,64 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <h2 class="mb-3">Payment History</h2>
+
+  <% if (!payments || payments.length === 0) { %>
+    <div class="alert alert-muted">No payments yet.</div>
+  <% } %>
+
+  <% if (payments && payments.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Listing</th>
+            <th>Coupon</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th style="width: 180px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% payments.forEach((p) => { %>
+            <tr>
+              <td>
+                <%= p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN") : "-" %>
+              </td>
+              <td>
+                <% if (p.listing) { %>
+                  <div class="fw-semibold"><%= p.listing.title %></div>
+                <% } else { %>
+                  <div class="text-muted">Listing</div>
+                <% } %>
+              </td>
+              <td><%= p.couponUsed ? p.couponUsed.code : "-" %></td>
+              <td>₹<%= Math.round((p.amount || 0) / 100).toLocaleString("en-IN") %></td>
+              <td>
+                <% let badgeClass = "bg-secondary";
+                  if (p.status === "paid") badgeClass = "bg-success";
+                  else if (p.status === "refunded") badgeClass = "bg-warning";
+                  else if (p.status === "failed") badgeClass = "bg-danger";
+                %>
+                <span class="badge <%= badgeClass %>"><%= p.status %></span>
+              </td>
+              <td>
+                <% if (p.status === "paid") { %>
+                  <form action="/bookings/<%= p.booking %>/refund" method="POST">
+                    <button class="btn btn-sm btn-outline-danger w-100" type="submit">
+                      Request refund
+                    </button>
+                  </form>
+                <% } else { %>
+                  <span class="text-muted small">-</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+

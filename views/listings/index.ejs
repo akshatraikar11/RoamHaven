@@ -1,51 +1,102 @@
 <% layout("/layouts/boilerplate") %>
 
+  <section class="hero-landing mb-4">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Unified Stays & Co-Living on RoamHaven</h1>
+      <p class="hero-subtitle">Discover student PGs, backpacker hostels, boutique hotels, and vacation villas with dynamic pricing, in-app wallet escrow, and AI discovery.</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-number" data-counter="<%= allListings.length %>">0</span>
+          <span class="hero-stat-label">Active Stays</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-number" data-counter="4">0</span>
+          <span class="hero-stat-label">Stay Types (PG, Hostel, Hotel, Villa)</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-number" data-counter="100">0</span>
+          <span class="hero-stat-label">% Escrow & Verified</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature #71: AI natural language search -->
+  <div class="container mb-3">
+    <div class="card shadow-sm border-0 ai-search-card">
+      <div class="card-body py-3">
+        <form id="aiSearchForm" class="row g-2 align-items-center">
+          <div class="col-lg-9">
+            <label for="aiSearchInput" class="form-label small text-muted mb-1"><i class="fa-solid fa-wand-magic-sparkles text-primary me-1"></i>AI Stay Discovery</label>
+            <input
+              type="text"
+              id="aiSearchInput"
+              class="form-control"
+              placeholder='Try: "Student PG in Bangalore with WiFi and AC under ₹12000" or "Hostel near beach in Goa"'
+              value="<%= typeof aiSearchQuery !== 'undefined' ? aiSearchQuery : '' %>"
+            />
+          </div>
+          <div class="col-lg-3 d-grid">
+            <label class="form-label small text-muted mb-1 d-none d-lg-block">&nbsp;</label>
+            <button type="submit" class="btn btn-dark">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Search with AI
+            </button>
+          </div>
+        </form>
+        <% if (typeof aiSearchQuery !== 'undefined' && aiSearchQuery) { %>
+          <div class="small text-muted mt-2">Parsed AI query: "<%= aiSearchQuery %>"</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
   <!-- Filters -->
   <div id="filters" class="navbar navbar-expand-md bg-body-light sticky-top">
     <div class="filter-container">
-      <div class="filter" data-category="all">
+      <div class="filter <%= !filters.category || filters.category === 'all' ? 'active' : '' %>" data-category="all">
         <div><i class="fa-solid fa-list"></i></div>
         <p>All</p>
       </div>
-      <div class="filter" data-category="trending">
+      <div class="filter <%= filters.category === 'trending' ? 'active' : '' %>" data-category="trending">
         <div><i class="fa-solid fa-fire"></i></div>
         <p>Trending</p>
       </div>
-      <div class="filter" data-category="rooms">
+      <div class="filter <%= filters.category === 'rooms' ? 'active' : '' %>" data-category="rooms">
         <div><i class="fa-solid fa-bed"></i></div>
         <p>Rooms</p>
       </div>
-      <div class="filter" data-category="iconic_cities">
+      <div class="filter <%= filters.category === 'iconic_cities' ? 'active' : '' %>" data-category="iconic_cities">
         <div><i class="fa-solid fa-mountain-city"></i></div>
         <p>Iconic cities</p>
       </div>
-      <div class="filter" data-category="mountains">
+      <div class="filter <%= filters.category === 'mountains' ? 'active' : '' %>" data-category="mountains">
         <div><i class="fa-solid fa-mountain"></i></div>
         <p>Mountains</p>
       </div>
-      <div class="filter" data-category="castles">
+      <div class="filter <%= filters.category === 'castles' ? 'active' : '' %>" data-category="castles">
         <div><i class="fa-brands fa-fort-awesome"></i></div>
         <p>Castles</p>
       </div>
-      <div class="filter" data-category="pools">
+      <div class="filter <%= filters.category === 'pools' ? 'active' : '' %>" data-category="pools">
         <div><i class="fa-solid fa-person-swimming"></i></div>
         <p>Amazing Pools</p>
       </div>
-      <div class="filter" data-category="camping">
+      <div class="filter <%= filters.category === 'camping' ? 'active' : '' %>" data-category="camping">
         <div><i class="fa-solid fa-campground"></i></div>
         <p>Camping</p>
       </div>
-      <div class="filter" data-category="farms">
+      <div class="filter <%= filters.category === 'farms' ? 'active' : '' %>" data-category="farms">
         <div><i class="fa-solid fa-cow"></i></div>
         <p>Farms</p>
       </div>
-      <div class="filter" data-category="arctic">
+      <div class="filter <%= filters.category === 'arctic' ? 'active' : '' %>" data-category="arctic">
         <div><i class="fa-solid fa-snowflake"></i></div>
         <p>Arctic</p>
       </div>
-      <div class="filter" data-category="pg_hostel">
-        <div><i class="fa-solid fa-building"></i></div>
-        <p>PG Hostel</p>
+      <div class="filter <%= filters.category === 'pg_hostel' ? 'active' : '' %>" data-category="pg_hostel">
+        <div><i class="fa-solid fa-hotel"></i></div>
+        <p>PGs & Hostels</p>
       </div>
     </div>
 
@@ -56,18 +107,305 @@
       </div>
     </div>
   </div>
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
-    <% for (let listing of allListings) { %>
-      <a href="/listings/<%= listing._id%>" class="listing-link" data-category="<%= listing.category || 'trending' %>">
-        <div class="card col listing-card">
+
+  <!-- Feature #11: Advanced Filter Panel + #15: Sort -->
+  <div class="advanced-filters-bar">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <!-- Sort Dropdown -->
+      <div class="dropdown">
+        <button class="filter-pill-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="fa-solid fa-arrow-down-wide-short me-1"></i>
+          Sort: <%= filters.sort === 'price_asc' ? 'Price ↑' : filters.sort === 'price_desc' ? 'Price ↓' : filters.sort === 'rating' ? 'Top Rated' : filters.sort === 'newest' ? 'Newest' : 'Relevant' %>
+        </button>
+        <ul class="dropdown-menu shadow-lg border-0">
+          <li><a class="dropdown-item <%= !filters.sort ? 'active' : '' %>" href="#" onclick="applySort('')">Most Relevant</a></li>
+          <li><a class="dropdown-item <%= filters.sort === 'price_asc' ? 'active' : '' %>" href="#" onclick="applySort('price_asc')">Price: Low to High</a></li>
+          <li><a class="dropdown-item <%= filters.sort === 'price_desc' ? 'active' : '' %>" href="#" onclick="applySort('price_desc')">Price: High to Low</a></li>
+          <li><a class="dropdown-item <%= filters.sort === 'rating' ? 'active' : '' %>" href="#" onclick="applySort('rating')">Top Rated</a></li>
+          <li><a class="dropdown-item <%= filters.sort === 'newest' ? 'active' : '' %>" href="#" onclick="applySort('newest')">Newest First</a></li>
+        </ul>
+      </div>
+
+      <!-- Price Filter -->
+      <button class="filter-pill-btn" type="button" data-bs-toggle="modal" data-bs-target="#locationFilterModal">
+        <i class="fa-solid fa-location-dot me-1"></i>
+        Location
+        <% if (filters.location) { %>
+          <span class="filter-badge">1</span>
+        <% } %>
+      </button>
+
+      <!-- Price Filter -->
+      <button class="filter-pill-btn" type="button" data-bs-toggle="modal" data-bs-target="#priceFilterModal">
+        <i class="fa-solid fa-indian-rupee-sign me-1"></i>
+        Price
+        <% if (filters.minPrice || filters.maxPrice) { %>
+          <span class="filter-badge"><%= filters.minPrice || '0' %>–<%= filters.maxPrice || '∞' %></span>
+        <% } %>
+      </button>
+
+      <!-- Amenities Filter -->
+      <button class="filter-pill-btn" type="button" data-bs-toggle="modal" data-bs-target="#amenitiesFilterModal">
+        <i class="fa-solid fa-sliders me-1"></i>
+        Amenities
+        <% if (filters.amenities) { %>
+          <span class="filter-badge"><%= filters.amenities.split(',').length %></span>
+        <% } %>
+      </button>
+
+      <!-- Guests Filter -->
+      <button class="filter-pill-btn" type="button" data-bs-toggle="modal" data-bs-target="#guestsFilterModal">
+        <i class="fa-solid fa-user-group me-1"></i>
+        Guests
+        <% if (filters.maxGuests) { %>
+          <span class="filter-badge"><%= filters.maxGuests %>+</span>
+        <% } %>
+      </button>
+
+      <!-- Rating Filter -->
+      <button class="filter-pill-btn" type="button" data-bs-toggle="modal" data-bs-target="#ratingFilterModal">
+        <i class="fa-solid fa-star me-1"></i>
+        Rating
+        <% if (filters.minRating) { %>
+          <span class="filter-badge"><%= filters.minRating %>+</span>
+        <% } %>
+      </button>
+
+      <!-- Clear Filters -->
+      <% if (filters.location || filters.minPrice || filters.maxPrice || filters.amenities || filters.maxGuests || filters.minRating || filters.sort || searchQuery) { %>
+        <a href="/listings" class="filter-clear-btn">
+          <i class="fa-solid fa-xmark me-1"></i>Clear all
+        </a>
+      <% } %>
+    </div>
+
+    <!-- Active Filter Badges -->
+    <% if (searchQuery) { %>
+      <div class="active-filter-badges mt-2">
+        <span class="active-badge">Search: "<%= searchQuery %>" <a href="javascript:void(0)" onclick="removeFilter('q')">×</a></span>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Location Filter Modal -->
+  <div class="modal fade" id="locationFilterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content filter-modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Location</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label small text-muted">City / Region / Area</label>
+          <input type="text" class="form-control" id="filterLocation" value="<%= filters.location || '' %>" placeholder="e.g. Goa, Mumbai, Manali">
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-link text-dark" onclick="clearLocationFilter()" data-bs-dismiss="modal">Clear</button>
+          <button type="button" class="btn btn-dark px-4" onclick="applyLocationFilter()" data-bs-dismiss="modal">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Filter Modal -->
+  <div class="modal fade" id="priceFilterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content filter-modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Price Range</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="price-slider-container">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label small text-muted">Minimum</label>
+                <div class="input-group">
+                  <span class="input-group-text">₹</span>
+                  <input type="number" class="form-control" id="filterMinPrice" value="<%= filters.minPrice || '' %>" placeholder="0" min="0">
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label small text-muted">Maximum</label>
+                <div class="input-group">
+                  <span class="input-group-text">₹</span>
+                  <input type="number" class="form-control" id="filterMaxPrice" value="<%= filters.maxPrice || '' %>" placeholder="Any" min="0">
+                </div>
+              </div>
+            </div>
+            <input type="range" class="form-range mt-3" min="0" max="50000" step="500" id="priceRangeSlider" value="<%= filters.maxPrice || 50000 %>">
+            <div class="d-flex justify-content-between small text-muted">
+              <span>₹0</span>
+              <span>₹50,000+</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-link text-dark" onclick="clearPriceFilter()" data-bs-dismiss="modal">Clear</button>
+          <button type="button" class="btn btn-dark px-4" onclick="applyPriceFilter()" data-bs-dismiss="modal">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amenities Filter Modal -->
+  <div class="modal fade" id="amenitiesFilterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content filter-modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Amenities</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="amenities-filter-grid">
+            <% const activeAmenities = filters.amenities ? filters.amenities.split(',') : []; %>
+            <% for (let [key, val] of Object.entries(AMENITIES_MAP)) { %>
+              <label class="amenity-filter-chip" for="filter-amenity-<%= key %>">
+                <input type="checkbox" class="amenity-filter-checkbox" value="<%= key %>" id="filter-amenity-<%= key %>"
+                  <%= activeAmenities.includes(key) ? 'checked' : '' %> />
+                <span class="amenity-chip-inner">
+                  <i class="<%= val.icon %>"></i>
+                  <span><%= val.label %></span>
+                </span>
+              </label>
+            <% } %>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-link text-dark" onclick="clearAmenitiesFilter()" data-bs-dismiss="modal">Clear</button>
+          <button type="button" class="btn btn-dark px-4" onclick="applyAmenitiesFilter()" data-bs-dismiss="modal">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guests Filter Modal -->
+  <div class="modal fade" id="guestsFilterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content filter-modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Number of Guests</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <select class="form-select" id="filterGuests">
+            <option value="">Any</option>
+            <% for (let i = 1; i <= 16; i++) { %>
+              <option value="<%= i %>" <%= filters.maxGuests == i ? 'selected' : '' %>><%= i %>+ guests</option>
+            <% } %>
+          </select>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-dark px-4 w-100" onclick="applyGuestsFilter()" data-bs-dismiss="modal">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Filter Modal -->
+  <div class="modal fade" id="ratingFilterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content filter-modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Minimum Rating</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="rating-filter-options">
+            <% for (let r = 5; r >= 1; r--) { %>
+              <label class="rating-filter-option">
+                <input type="radio" name="filterRating" value="<%= r %>" <%= filters.minRating == r ? 'checked' : '' %>>
+                <span class="rating-stars">
+                  <% for (let s = 1; s <= 5; s++) { %>
+                    <i class="fa-<%= s <= r ? 'solid' : 'regular' %> fa-star"></i>
+                  <% } %>
+                </span>
+                <span><%= r %>+</span>
+              </label>
+            <% } %>
+            <label class="rating-filter-option">
+              <input type="radio" name="filterRating" value="" <%= !filters.minRating ? 'checked' : '' %>>
+              <span>Any rating</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-dark px-4 w-100" onclick="applyRatingFilter()" data-bs-dismiss="modal">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-info mt-3 mb-2">
+    <p class="text-muted mb-0">
+      <strong><%= allListings.length %></strong> listing<%= allListings.length !== 1 ? 's' : '' %> found
+      <% if (searchQuery) { %> for "<strong><%= searchQuery %></strong>"<% } %>
+    </p>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="btn btn-sm btn-outline-dark <%= filters.collection === 'monsoon_getaways' ? 'active' : '' %>" href="/listings?collection=monsoon_getaways">Monsoon Getaways</a>
+    <a class="btn btn-sm btn-outline-dark <%= filters.collection === 'winter_cabins' ? 'active' : '' %>" href="/listings?collection=winter_cabins">Winter Cabins</a>
+    <a class="btn btn-sm btn-outline-dark <%= filters.collection === 'summer_beach' ? 'active' : '' %>" href="/listings?collection=summer_beach">Summer Beach</a>
+    <button class="btn btn-sm btn-dark" id="voiceSearchBtn"><i class="fa-solid fa-microphone"></i> Voice Search</button>
+    <button class="btn btn-sm btn-outline-primary" id="compareSelectedBtn">Compare Selected</button>
+    <button class="btn btn-sm btn-outline-dark" id="toggleMapViewBtn"><i class="fa-solid fa-map"></i> Map view</button>
+  </div>
+
+  <style>
+    .index-split-wrap { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .index-split-wrap.map-on { grid-template-columns: 1fr; }
+    @media (min-width: 992px) {
+      .index-split-wrap.map-on { grid-template-columns: 1.15fr 0.85fr; align-items: start; }
+    }
+    .index-map-card { position: sticky; top: 90px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,0,0,0.08); }
+    #indexMap { width: 100%; height: 560px; }
+    .leaflet-container { border-radius: 16px; }
+  </style>
+
+  <div class="index-split-wrap" id="indexSplitWrap">
+    <div>
+      <!-- Listings Grid -->
+      <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+        <% for (let listing of allListings) { %>
+          <a href="/listings/<%= listing._id%>" class="listing-link js-page-link" data-category="<%= listing.category || 'trending' %>"
+             onclick="trackListingClick('<%= listing._id %>')">
+            <div class="card col listing-card listing-skeleton-card" data-listing-card-id="<%= listing._id %>">
+          <div class="form-check m-2 position-absolute z-3">
+            <input class="form-check-input compare-checkbox" type="checkbox" value="<%= listing._id %>" onclick="event.preventDefault();event.stopPropagation();">
+          </div>
           <div class="card-img-container">
-            <img src="<%= listing.image.url%>" class="card-img-top" alt="listings_image" />
+            <% if (listing.images && listing.images.length > 1) { %>
+              <!-- Mini carousel for multi-image listings -->
+              <div class="card-carousel" id="cardCarousel-<%= listing._id %>">
+                <% listing.images.slice(0, 5).forEach((img, i) => { %>
+                  <img src="<%= img.url %>" class="card-img-top card-carousel-img <%= i === 0 ? 'active' : '' %>"
+                       alt="listing_image" data-index="<%= i %>" />
+                <% }) %>
+              </div>
+              <div class="card-carousel-controls">
+                <button class="card-carousel-btn card-prev" onclick="cardCarouselNav(event, '<%= listing._id %>', -1)">‹</button>
+                <button class="card-carousel-btn card-next" onclick="cardCarouselNav(event, '<%= listing._id %>', 1)">›</button>
+              </div>
+              <div class="card-carousel-dots">
+                <% listing.images.slice(0, 5).forEach((_, i) => { %>
+                  <span class="card-dot <%= i === 0 ? 'active' : '' %>"></span>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <img src="<%= listing.image.url%>" class="card-img-top" alt="listings_image" />
+            <% } %>
             <div class="card-overlay-icons">
               <% if(listing.price> 5000) { %>
                 <div class="guest-fav-badge">Guest favourite</div>
                 <% } %>
-                  <button class="fav-heart-btn">
-                    <i class="fa-regular fa-heart fav-heart"></i>
+                  <%
+                    const favIds = typeof userFavorites !== "undefined" ? userFavorites : [];
+                    const isFav = favIds && favIds.includes(String(listing._id));
+                  %>
+                  <button class="fav-heart-btn" data-listing-id="<%= listing._id %>" aria-label="Save listing" title="Save listing">
+                    <i class="fa-<%= isFav ? 'solid' : 'regular' %> fa-heart fav-heart <%= isFav ? 'heart-active' : '' %>"></i>
                   </button>
             </div>
           </div>
@@ -78,24 +416,137 @@
               </div>
               <div class="listing-rating">
                 <i class="fa-solid fa-star"></i>
-                <span class="rating-value">5.0</span>
+                <%
+                  let listingAvg = 'New';
+                  if (listing.reviews && listing.reviews.length > 0) {
+                    let ratingSum = listing.reviews.reduce((acc, r) => acc + r.rating, 0);
+                    listingAvg = (ratingSum / listing.reviews.length).toFixed(1);
+                  }
+                %>
+                <span class="rating-value"><%= listingAvg %></span>
               </div>
             </div>
             <div class="listing-subtitle">
               <%= listing.location || 'Location' %>, <%= listing.country || 'India' %>
             </div>
+            <!-- Feature #23: Room details on card -->
+            <div class="listing-room-info">
+              <span><%= listing.maxGuests || 2 %> guests</span> ·
+              <span><%= listing.bedrooms || 1 %> bed<%= (listing.bedrooms || 1) !== 1 ? 's' : '' %></span>
+            </div>
             <div class="listing-price">
               <span class="price-amount">₹<%= listing.price.toLocaleString("en-IN") %></span>
               <span class="night-text">night</span>
+              <% if (listing.weekendPrice && listing.weekendPrice !== listing.price) { %>
+                <span class="weekend-tag">₹<%= listing.weekendPrice.toLocaleString("en-IN") %> weekend</span>
+              <% } %>
             </div>
             <i class="tax-info tax-hidden">&nbsp; +18% GST</i>
           </div>
         </div>
       </a>
       <% } %>
+      </div>
+    </div>
+
+    <div class="index-map-card d-none" id="indexMapCard">
+      <div id="indexMap"></div>
+    </div>
   </div>
 
+  <% if (allListings.length === 0) { %>
+    <div class="no-results-container text-center py-5">
+      <i class="fa-solid fa-magnifying-glass fa-3x text-muted mb-3"></i>
+      <h4>No listings found</h4>
+      <p class="text-muted">Try adjusting your search or filters to find what you're looking for.</p>
+      <a href="/listings" class="btn btn-outline-dark">Clear all filters</a>
+    </div>
+  <% } %>
+
   <script>
+    // ==========================
+    // Feature #65/#66: Map split view + clustering
+    // ==========================
+    const mapData = <%- JSON.stringify(mapData || { type: "FeatureCollection", features: [] }) %>;
+    const splitWrap = document.getElementById("indexSplitWrap");
+    const mapCard = document.getElementById("indexMapCard");
+    const toggleBtn = document.getElementById("toggleMapViewBtn");
+    let indexMapInstance = null;
+    let markerLayer = null;
+
+    async function ensureIndexMap() {
+      if (indexMapInstance) return;
+      if (!window.L) return;
+      indexMapInstance = L.map("indexMap", { zoomControl: true }).setView([20.5937, 78.9629], 4); // India
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 19,
+      }).addTo(indexMapInstance);
+
+      // Lightweight clustering without a bundler: load markercluster from CDN when needed
+      await new Promise((resolve) => {
+        if (L.markerClusterGroup) return resolve();
+        const css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css";
+        document.head.appendChild(css);
+        const css2 = document.createElement("link");
+        css2.rel = "stylesheet";
+        css2.href = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css";
+        document.head.appendChild(css2);
+        const s = document.createElement("script");
+        s.src = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js";
+        s.onload = resolve;
+        document.body.appendChild(s);
+      });
+
+      markerLayer = L.markerClusterGroup();
+      const bounds = [];
+      (mapData.features || []).forEach((f) => {
+        const c = f.geometry?.coordinates;
+        if (!Array.isArray(c) || c.length !== 2) return;
+        const latlng = [c[1], c[0]];
+        bounds.push(latlng);
+        const popup = `
+          <div style="min-width:180px;">
+            <div style="font-weight:700;margin-bottom:4px;">${f.properties?.title || ""}</div>
+            <div style="color:#666;font-size:12px;">${f.properties?.location || ""}</div>
+            <div style="margin-top:6px;font-weight:700;">₹${Number(f.properties?.price || 0).toLocaleString("en-IN")} / night</div>
+            <a href="/listings/${f.properties?.id}" style="display:inline-block;margin-top:8px;color:#ff385c;text-decoration:none;">Open</a>
+          </div>
+        `;
+        const m = L.marker(latlng).bindPopup(popup);
+        m.on("mouseover", () => {
+          const card = document.querySelector(`[data-listing-card-id="${f.properties?.id}"]`);
+          if (card) card.classList.add("shadow");
+        });
+        m.on("mouseout", () => {
+          const card = document.querySelector(`[data-listing-card-id="${f.properties?.id}"]`);
+          if (card) card.classList.remove("shadow");
+        });
+        markerLayer.addLayer(m);
+      });
+      indexMapInstance.addLayer(markerLayer);
+      if (bounds.length > 0) {
+        indexMapInstance.fitBounds(bounds, { padding: [30, 30] });
+      }
+    }
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", async () => {
+        const turningOn = mapCard.classList.contains("d-none");
+        if (turningOn) {
+          mapCard.classList.remove("d-none");
+          splitWrap.classList.add("map-on");
+          await ensureIndexMap();
+          setTimeout(() => indexMapInstance?.invalidateSize(), 60);
+        } else {
+          mapCard.classList.add("d-none");
+          splitWrap.classList.remove("map-on");
+        }
+      });
+    }
+
     // Tax toggle functionality
     let taxSwitch = document.getElementById("flexSwitchCheckDefault");
     taxSwitch.addEventListener("click", () => {
@@ -109,28 +560,222 @@
       }
     });
 
-    // Category filter functionality
-    const filterButtons = document.querySelectorAll('.filter');
-    const listingLinks = document.querySelectorAll('.listing-link');
+    // ==========================================
+    // Filter & Sort Helpers
+    // ==========================================
+    function getCurrentParams() {
+      return new URLSearchParams(window.location.search);
+    }
 
+    function applyParams(params) {
+      // Remove empty params
+      for (const [key, val] of [...params.entries()]) {
+        if (!val) params.delete(key);
+      }
+      window.location.href = `/listings?${params.toString()}`;
+    }
+
+    function removeFilter(key) {
+      const params = getCurrentParams();
+      params.delete(key);
+      applyParams(params);
+    }
+
+    function applyLocationFilter() {
+      const params = getCurrentParams();
+      const val = document.getElementById('filterLocation').value.trim();
+      if (val) params.set('location', val); else params.delete('location');
+      applyParams(params);
+    }
+
+    function clearLocationFilter() {
+      const params = getCurrentParams();
+      params.delete('location');
+      applyParams(params);
+    }
+
+    // Category filter (now server-side via query param)
+    const filterButtons = document.querySelectorAll('.filter');
     filterButtons.forEach(button => {
       button.addEventListener('click', () => {
         const selectedCategory = button.getAttribute('data-category');
-
-        // Remove active class from all filters
-        filterButtons.forEach(btn => btn.style.opacity = '0.7');
-        // Add active class to clicked filter
-        button.style.opacity = '1';
-
-        // Filter listings
-        listingLinks.forEach(link => {
-          const listingCategory = link.getAttribute('data-category');
-          if (selectedCategory === 'all' || listingCategory === selectedCategory) {
-            link.style.display = 'block';
-          } else {
-            link.style.display = 'none';
-          }
-        });
+        const params = getCurrentParams();
+        if (selectedCategory === 'all') {
+          params.delete('category');
+        } else {
+          params.set('category', selectedCategory);
+        }
+        applyParams(params);
       });
     });
+
+    // Sort
+    function applySort(sortVal) {
+      const params = getCurrentParams();
+      if (sortVal) {
+        params.set('sort', sortVal);
+      } else {
+        params.delete('sort');
+      }
+      applyParams(params);
+    }
+
+    // Price Filter
+    function applyPriceFilter() {
+      const params = getCurrentParams();
+      const min = document.getElementById('filterMinPrice').value;
+      const max = document.getElementById('filterMaxPrice').value;
+      if (min) params.set('minPrice', min); else params.delete('minPrice');
+      if (max) params.set('maxPrice', max); else params.delete('maxPrice');
+      applyParams(params);
+    }
+
+    function clearPriceFilter() {
+      const params = getCurrentParams();
+      params.delete('minPrice');
+      params.delete('maxPrice');
+      applyParams(params);
+    }
+
+    // Price range slider sync
+    const priceSlider = document.getElementById('priceRangeSlider');
+    if (priceSlider) {
+      priceSlider.addEventListener('input', () => {
+        document.getElementById('filterMaxPrice').value = priceSlider.value;
+      });
+    }
+
+    // Amenities Filter
+    function applyAmenitiesFilter() {
+      const params = getCurrentParams();
+      const checked = [...document.querySelectorAll('.amenity-filter-checkbox:checked')].map(c => c.value);
+      if (checked.length > 0) {
+        params.set('amenities', checked.join(','));
+      } else {
+        params.delete('amenities');
+      }
+      applyParams(params);
+    }
+
+    function clearAmenitiesFilter() {
+      document.querySelectorAll('.amenity-filter-checkbox').forEach(c => c.checked = false);
+      const params = getCurrentParams();
+      params.delete('amenities');
+      applyParams(params);
+    }
+
+    // Guests Filter
+    function applyGuestsFilter() {
+      const params = getCurrentParams();
+      const val = document.getElementById('filterGuests').value;
+      if (val) params.set('maxGuests', val); else params.delete('maxGuests');
+      applyParams(params);
+    }
+
+    // Rating Filter
+    function applyRatingFilter() {
+      const params = getCurrentParams();
+      const selected = document.querySelector('input[name="filterRating"]:checked');
+      if (selected && selected.value) {
+        params.set('minRating', selected.value);
+      } else {
+        params.delete('minRating');
+      }
+      applyParams(params);
+    }
+
+    // Feature #19: Track clicks for analytics
+    function trackListingClick(listingId) {
+      fetch(`/listings/${listingId}/track-click`, { method: 'POST' }).catch(() => {});
+    }
+
+    // Feature #9: Card carousel navigation
+    function cardCarouselNav(event, listingId, dir) {
+      event.preventDefault();
+      event.stopPropagation();
+      const container = document.getElementById(`cardCarousel-${listingId}`);
+      if (!container) return;
+      const imgs = container.querySelectorAll('.card-carousel-img');
+      const dots = container.parentElement.querySelectorAll('.card-dot');
+      let current = [...imgs].findIndex(img => img.classList.contains('active'));
+      imgs[current].classList.remove('active');
+      if (dots[current]) dots[current].classList.remove('active');
+      current = (current + dir + imgs.length) % imgs.length;
+      imgs[current].classList.add('active');
+      if (dots[current]) dots[current].classList.add('active');
+    }
+
+    // Animated counters in hero section
+    const statCounters = document.querySelectorAll('.hero-stat-number[data-counter]');
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const target = Number(el.dataset.counter || 0);
+        const duration = 900;
+        const start = performance.now();
+        const animate = (time) => {
+          const progress = Math.min((time - start) / duration, 1);
+          el.textContent = Math.round(target * progress).toLocaleString('en-IN');
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        };
+        requestAnimationFrame(animate);
+        counterObserver.unobserve(el);
+      });
+    }, { threshold: 0.4 });
+    statCounters.forEach((counter) => counterObserver.observe(counter));
+
+    // Feature #138: Voice search
+    const voiceBtn = document.getElementById('voiceSearchBtn');
+    if (voiceBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-IN';
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const params = getCurrentParams();
+        params.set('q', transcript);
+        applyParams(params);
+      };
+      voiceBtn.addEventListener('click', () => recognition.start());
+    }
+
+    // Feature #136: Compare selected listings
+    const compareBtn = document.getElementById('compareSelectedBtn');
+    if (compareBtn) {
+      compareBtn.addEventListener('click', () => {
+        const selected = [...document.querySelectorAll('.compare-checkbox:checked')].map((c) => c.value).slice(0, 3);
+        if (selected.length < 2) {
+          alert('Select at least 2 listings to compare.');
+          return;
+        }
+        window.location.href = `/listings/compare?ids=${selected.join(',')}`;
+      });
+    }
+    // Feature #71: AI natural language search
+    const aiSearchForm = document.getElementById('aiSearchForm');
+    if (aiSearchForm) {
+      aiSearchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = document.getElementById('aiSearchInput')?.value?.trim();
+        if (!query) return;
+        try {
+          const res = await fetch('/api/ai/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query }),
+          });
+          const data = await res.json();
+          if (data?.redirectUrl) {
+            window.location.href = data.redirectUrl;
+          } else {
+            window.location.href = `/listings?ai=${encodeURIComponent(query)}`;
+          }
+        } catch (_) {
+          window.location.href = `/listings?ai=${encodeURIComponent(query)}`;
+        }
+      });
+    }
   </script>

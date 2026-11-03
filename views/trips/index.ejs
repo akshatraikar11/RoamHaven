@@ -1,0 +1,53 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold mb-0">Collaborative Trip Planning</h2>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <form method="POST" action="/trips" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Trip name</label>
+          <input class="form-control" name="name" placeholder="Weekend in Goa" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Destination</label>
+          <input class="form-control" name="destination" placeholder="Goa" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Start</label>
+          <input class="form-control" type="date" name="startDate" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">End</label>
+          <input class="form-control" type="date" name="endDate" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Invite emails (comma-separated)</label>
+          <input class="form-control" name="invitedEmails" placeholder="a@mail.com, b@mail.com" />
+        </div>
+        <div class="col-12">
+          <button class="btn btn-dark">Create Trip</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <% trips.forEach(trip => { %>
+      <div class="col-md-6">
+        <a class="text-decoration-none text-dark" href="/trips/<%= trip._id %>">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="fw-bold"><%= trip.name %></h5>
+              <p class="text-muted mb-1"><%= trip.destination || "Any destination" %></p>
+              <p class="small text-muted mb-0"><%= (trip.invitedEmails || []).length %> collaborators · <%= (trip.listings || []).length %> saved listings</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    <% }) %>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <h2 class="fw-bold mb-4">Listing Comparison</h2>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <% cards.forEach(c => { %>
+            <th><%= c.listing.title %></th>
+          <% }) %>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Price / night</th>
+          <% cards.forEach(c => { %><td>₹<%= c.listing.price.toLocaleString("en-IN") %></td><% }) %>
+        </tr>
+        <tr>
+          <th>Location</th>
+          <% cards.forEach(c => { %><td><%= c.listing.location %>, <%= c.listing.country %></td><% }) %>
+        </tr>
+        <tr>
+          <th>Category</th>
+          <% cards.forEach(c => { %><td><%= c.listing.category || "N/A" %></td><% }) %>
+        </tr>
+        <tr>
+          <th>Guests</th>
+          <% cards.forEach(c => { %><td><%= c.listing.maxGuests || 2 %></td><% }) %>
+        </tr>
+        <tr>
+          <th>Beds / Baths</th>
+          <% cards.forEach(c => { %><td><%= c.listing.beds || 1 %> / <%= c.listing.bathrooms || 1 %></td><% }) %>
+        </tr>
+        <tr>
+          <th>Rating</th>
+          <% cards.forEach(c => { %><td>★ <%= c.avgRating %></td><% }) %>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

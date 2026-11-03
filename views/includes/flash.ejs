@@ -1,29 +1,10 @@
-<% if(success && success.length) { %>
-<div
-  class="alert alert-success alert-dismissible fade show col-6 offset-3"
-  role="alert"
->
-  <%= success %>
-  <button
-    type="button"
-    class="btn-close"
-    data-bs-dismiss="alert"
-    aria-label="Close"
-  ></button>
+<div id="flash-data" class="d-none">
+  <% const safeSuccess = typeof success !== "undefined" ? success : []; %>
+  <% const safeError = typeof error !== "undefined" ? error : []; %>
+  <% if (safeSuccess && safeSuccess.length) { %>
+    <span data-flash-type="success" data-flash-message="<%= safeSuccess[0] %>"></span>
+  <% } %>
+  <% if (safeError && safeError.length) { %>
+    <span data-flash-type="error" data-flash-message="<%= safeError[0] %>"></span>
+  <% } %>
 </div>
-
-
-<% } %> <% if(error && error.length) { %>
-<div
-  class="alert alert-danger alert-dismissible fade show col-6 offset-3"
-  role="alert"
->
-  <%= error %>
-  <button
-    type="button"
-    class="btn-close"
-    data-bs-dismiss="alert"
-    aria-label="Close"
-  ></button>
-</div>
-<% } %>

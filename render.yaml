@@ -1,0 +1,29 @@
+name: roamhaven
+services:
+  - type: web
+    name: roamhaven-web
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: node app.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ATLASDB_URL
+        sync: false
+      - key: SECRET
+        generateValue: true
+      - key: REDIS_URL
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+databases:
+  - name: roamhaven-db
+    plan: free
+    databaseName: roamhaven

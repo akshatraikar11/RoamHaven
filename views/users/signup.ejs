@@ -6,6 +6,12 @@
           <h2 class="text-center mb-4 fw-bold text-dark">Create Account</h2>
 
           <form action="/signup" method="POST" class="needs-validation" novalidate>
+            <% if (typeof ref !== "undefined" && ref) { %>
+              <div class="alert alert-success small">
+                You're signing up with a referral code: <strong><%= ref %></strong>
+                <input type="hidden" name="ref" value="<%= ref %>" />
+              </div>
+            <% } %>
             <div class="mb-3">
               <label for="username" class="form-label fw-semibold text-secondary">Username</label>
               <input name="username" id="username" type="text" class="form-control form-control-lg bg-light border-0"

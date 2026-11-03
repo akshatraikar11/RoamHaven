@@ -1,0 +1,55 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-5">
+  <div class="col-8 offset-2 col-md-6 offset-md-3">
+    <div class="card shadow-sm border-0 auth-card">
+      <div class="card-body p-4 p-md-5 text-center">
+        <div class="verify-email-icon mb-4">
+          <i class="fa-solid fa-envelope-circle-check"></i>
+        </div>
+
+        <% if (currUser && currUser.isEmailVerified) { %>
+          <h2 class="fw-bold text-success mb-3">Email Verified! ✓</h2>
+          <p class="text-muted mb-4">Your email address has been verified. You have full access to RoamHaven.</p>
+          <a href="/listings" class="btn btn-primary btn-lg w-100">Browse Listings</a>
+        <% } else { %>
+          <h2 class="fw-bold text-dark mb-3">Verify Your Email</h2>
+          <p class="text-muted mb-2">
+            We've sent a verification link to:
+          </p>
+          <p class="fw-semibold text-dark mb-4">
+            <%= currUser ? currUser.email : 'your email' %>
+          </p>
+
+          <div class="verify-steps mb-4">
+            <div class="verify-step">
+              <div class="step-number">1</div>
+              <p>Check your inbox (and spam folder)</p>
+            </div>
+            <div class="verify-step">
+              <div class="step-number">2</div>
+              <p>Click the verification link</p>
+            </div>
+            <div class="verify-step">
+              <div class="step-number">3</div>
+              <p>Start exploring RoamHaven!</p>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <p class="text-muted small mb-3">Didn't receive the email?</p>
+          <form action="/resend-verification" method="POST">
+            <button type="submit" class="btn btn-outline-dark btn-lg w-100 mb-3">
+              <i class="fa-solid fa-paper-plane me-2"></i>Resend Verification Email
+            </button>
+          </form>
+
+          <a href="/listings" class="text-muted text-decoration-none small">
+            Skip for now → (some features will be limited)
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

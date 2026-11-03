@@ -1,50 +1,200 @@
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
 }
-console.log("🚀 Server Starting...");
-console.log("🔑 Google API Key Status:", process.env.GOOGLE_API_KEY ? "Loaded ✅" : "Missing ❌");
-console.log("💽 DB URL:", process.env.ATLASDB_URL ? "Loaded from Env" : "Using Local Fallback");
 
 const express = require("express");
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const ExpressError = require("./utils/ExpressError.js");
+const {
+  ExpressError,
+  NotFoundError,
+} = require("./utils/ExpressError.js");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+const Wallet = require("./models/wallet.js");
+const Notification = require("./models/notification.js");
 const axios = require("axios");
+const { ApolloServer } = require("@apollo/server");
+const { expressMiddleware } = require("@apollo/server/express4");
+const { typeDefs, resolvers } = require("./graphql/schema.js");
+const { initCache } = require("./utils/cache.js");
+const { generalLimiter, authLimiter, apiLimiter } = require("./utils/rateLimiters.js");
+const { csrfProtection } = require("./utils/csrf.js");
+const logger = require("./utils/logger.js");
+const { correlationMiddleware } = require("./utils/correlation.js");
+const { metricsMiddleware, metricsHandler } = require("./utils/metrics.js");
+const swaggerSpec = require("./utils/swagger.js");
+const swaggerUi = require("swagger-ui-express");
+const {
+  trackSocketConnect,
+  trackSocketDisconnect,
+  emitAdminAnalytics,
+} = require("./utils/analytics.js");
+
+logger.info("🚀 Server Starting...");
+logger.info(`🔑 Google API Key Status: ${process.env.GOOGLE_API_KEY ? "Loaded ✅" : "Missing ❌"}`);
+logger.info(`💽 DB URL: ${process.env.ATLASDB_URL ? "Loaded from Env" : "Using Local Fallback"}`);
+
+const helmet = require("helmet");
+
+// Feature #58: Realtime notifications (Socket.io)
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+});
+app.locals.io = io;
+
+io.on("connection", (socket) => {
+  trackSocketConnect();
+  emitAdminAnalytics(io).catch(() => {});
+
+  const userId = socket.handshake.query?.userId;
+  if (userId) {
+    socket.join(`user:${String(userId)}`);
+  }
+
+  socket.on("admin:analytics:subscribe", () => {
+    socket.join("admin:analytics");
+    emitAdminAnalytics(io).catch(() => {});
+  });
+
+  socket.on("disconnect", () => {
+    trackSocketDisconnect();
+    emitAdminAnalytics(io).catch(() => {});
+  });
+});
 
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const wishlistRouter = require("./routes/wishlist.js");
 
 // Use Atlas URL from environment when available, otherwise fall back to local MongoDB
 const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/roamhaven";
 
 main()
   .then(() => {
-    console.log("connected to DB");
+    logger.info("connected to DB");
   })
   .catch((err) => {
-    console.log(err);
+    logger.error("DB connection error:", err);
   });
 async function main() {
   await mongoose.connect(dbUrl);
+  await initCache();
 }
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:", "https:", "http:"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdn.jsdelivr.net",
+          "https://unpkg.com",
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdn.jsdelivr.net",
+          "https://cdnjs.cloudflare.com",
+          "https://unpkg.com",
+        ],
+        fontSrc: [
+          "'self'",
+          "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net",
+          "data:",
+        ],
+        connectSrc: ["'self'", "ws:", "wss:", "https:"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'self'", "https://www.google.com"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+app.use(correlationMiddleware);
+app.use(metricsMiddleware);
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
+app.use(generalLimiter);
+
+// Security: sanitize query/body/params against NoSQL injection & XSS
+function sanitizeNoSqlPayload(input) {
+  if (!input || typeof input !== "object") return;
+  if (Array.isArray(input)) {
+    input.forEach((item) => sanitizeNoSqlPayload(item));
+    return;
+  }
+
+  for (const key of Object.keys(input)) {
+    const value = input[key];
+    const sanitizedKey = key.replaceAll("$", "_").replaceAll(".", "_");
+    if (sanitizedKey !== key) {
+      delete input[key];
+      input[sanitizedKey] = value;
+    }
+    sanitizeNoSqlPayload(input[sanitizedKey]);
+  }
+}
+
+app.use((req, res, next) => {
+  sanitizeNoSqlPayload(req.body);
+  sanitizeNoSqlPayload(req.params);
+  sanitizeNoSqlPayload(req.query);
+  next();
+});
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function sanitizeStrings(input) {
+  if (input == null) return;
+  if (typeof input === "string") return escapeHtml(input);
+  if (Array.isArray(input)) return input.map((v) => sanitizeStrings(v));
+  if (typeof input !== "object") return input;
+
+  for (const key of Object.keys(input)) {
+    input[key] = sanitizeStrings(input[key]);
+  }
+  return input;
+}
+
+// Express 5-safe XSS hardening: mutate nested values, don't reassign req.query
+app.use((req, res, next) => {
+  sanitizeStrings(req.body);
+  sanitizeStrings(req.params);
+  sanitizeStrings(req.query);
+  next();
+});
 
 const store = MongoStore.create({
   mongoUrl: dbUrl,
@@ -54,7 +204,7 @@ const store = MongoStore.create({
   touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+store.on("error", (err) => {
   console.log("Error in MONGO SESSION STORE", err);
 });
 
@@ -62,12 +212,16 @@ const sessionOptions = {
   store,
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  rolling: true, // Regenerate session ID on each request
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
   },
+  name: "roamhaven.sid", // Custom session cookie name for security
 };
 
 // Root route: redirect to listings index
@@ -82,237 +236,204 @@ passport.deserializeUser(User.deserializeUser());
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await User.findOne({ googleId: profile.id });
-        if (user) {
-          return done(null, user);
-        } else {
-          const newUser = new User({
-            email: profile.emails[0].value,
-            username: profile.displayName,
-            googleId: profile.id,
-          });
-          user = await newUser.save();
-          return done(null, user);
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "/auth/google/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await User.findOne({ googleId: profile.id });
+          if (user) {
+            return done(null, user);
+          } else {
+            const newUser = new User({
+              email: profile.emails[0].value,
+              username: profile.displayName,
+              googleId: profile.id,
+            });
+            user = await newUser.save();
+            return done(null, user);
+          }
+        } catch (err) {
+          return done(err);
         }
-      } catch (err) {
-        return done(err);
       }
-    }
-  )
-);
+    )
+  );
+} else {
+  logger.info("🔐 Google OAuth disabled — GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured");
+}
 
 app.use(session(sessionOptions)); // session setup
 app.use(flash()); // flash setup
+app.use(csrfProtection); // CSRF protection
 
 app.use(passport.initialize()); // passport init
 app.use(passport.session());
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
+  res.locals.userRole = req.user ? req.user.role : null;
+  res.locals.isEmailVerified = req.user ? req.user.isEmailVerified : false;
+  res.locals.loyaltyPoints = req.user ? req.user.loyaltyPoints || 0 : 0;
+  res.locals.userBadges = req.user ? req.user.badges || [] : [];
+  res.locals.idVerificationStatus = req.user?.idVerification?.status || "unverified";
+  res.locals.userFavorites = (req.user?.favorites || []).map((id) => String(id));
+  res.locals.walletBalance = 0;
+  res.locals.unreadNotificationCount = 0;
+
+  try {
+    if (req.user) {
+      const [wallet, unreadCount] = await Promise.all([
+        Wallet.findOne({ user: req.user._id }).select("balance").lean(),
+        Notification.countDocuments({ user: req.user._id, isRead: false }),
+      ]);
+      res.locals.walletBalance = wallet ? wallet.balance : 0;
+      res.locals.unreadNotificationCount = unreadCount;
+    }
+  } catch (_err) {
+    // Non-critical: wallet/notifications are progressive enhancement.
+    // Never block the request/response cycle on view-metadata failures.
+  }
+
   next();
 });
 
 const bookingRouter = require("./routes/bookings.js");
+const chatRouter = require("./routes/chat.js");
+const notificationsRouter = require("./routes/notifications.js");
+const walletRouter = require("./routes/wallet.js");
+const adminRouter = require("./routes/admin.js");
+const aiRouter = require("./routes/ai.js");
+const revenueRouter = require("./routes/revenue.js");
+const tripsRouter = require("./routes/trips.js");
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use(
+  ["/login", "/signup", "/forgot-password", "/reset-password", "/auth/google"],
+  authLimiter
+);
 app.use("/", userRouter);
+app.use("/", wishlistRouter);
 app.use("/bookings", bookingRouter);
+app.use("/api", apiLimiter, chatRouter);
+app.use("/api", apiLimiter, notificationsRouter);
+app.use("/api", apiLimiter, aiRouter);
+app.use("/wallet", walletRouter);
+app.use("/admin", adminRouter);
+app.use("/revenue", revenueRouter);
+app.use("/trips", tripsRouter);
 
-// app.all("*", (req, res, next) => {
-//   next(new ExpressError(404, "Page Not Found"));
-// });
+// Swagger API Documentation (only in development)
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get("/api-docs.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
+  });
+}
 
-// Simple Rule-Based Chatbot (No API needed)
-app.post("/api/jarvis", async (req, res) => {
-  try {
-    const { message } = req.body;
-    const Listing = require("./models/listing.js");
+// Observability: Prometheus scrape endpoint for Kubernetes HPA & Grafana
+app.get("/metrics", metricsHandler);
 
-    const userMessage = message.toLowerCase().trim();
-    let reply = "";
+// Feature #122: Health check endpoint (used by Docker/K8s)
+app.get("/api/health", (req, res) => {
+  const dbStates = ["disconnected", "connected", "connecting", "disconnecting"];
+  const dbState = mongoose.connection.readyState;
+  res.status(dbState === 1 ? 200 : 503).json({
+    status: dbState === 1 ? "ok" : "degraded",
+    db: dbStates[dbState] || "unknown",
+    uptime: Math.floor(process.uptime()),
+    memory: {
+      rss: process.memoryUsage().rss,
+      heapUsed: process.memoryUsage().heapUsed,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
 
-    // Greeting
-    if (userMessage.match(/^(hi|hello|hey|good morning|good evening)/)) {
-      reply = "👋 Hello! I'm RoamMate, your travel assistant. I can help you with:<br><br>" +
-        "🏠 <b>Find listings</b> - Ask about places in any location<br>" +
-        "💰 <b>Check prices</b> - Get pricing information<br>" +
-        "📍 <b>Locations</b> - Explore different destinations<br>" +
-        "❓ <b>Help & Support</b> - Get answers to common questions<br><br>" +
-        "What would you like to know?";
-    }
+// GraphQL endpoint (Feature #153)
+async function startGraphQL() {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req }) => ({ user: req.user }),
+  });
+  await server.start();
+  app.use("/graphql", apiLimiter, expressMiddleware(server));
+}
 
-    // Search for listings by location
-    else if (userMessage.match(/(show|find|search|list|looking for|need).*(listing|place|property|room|accommodation)/i) ||
-      userMessage.match(/(nashik|mumbai|goa|delhi|bangalore|pune|india)/i)) {
-
-      // Extract location if mentioned
-      let location = null;
-      const locations = ['nashik', 'mumbai', 'goa', 'delhi', 'bangalore', 'pune'];
-      for (const loc of locations) {
-        if (userMessage.includes(loc)) {
-          location = loc;
-          break;
-        }
-      }
-
-      let listings;
-      if (location) {
-        listings = await Listing.find({
-          location: new RegExp(location, 'i')
-        }).limit(5).select("title price location country");
-      } else {
-        listings = await Listing.find({}).limit(5).select("title price location country");
-      }
-
-      if (listings.length > 0) {
-        reply = location
-          ? `🏠 Here are some amazing places in <b>${location.charAt(0).toUpperCase() + location.slice(1)}</b>:<br><br>`
-          : "🏠 Here are some of our top listings:<br><br>";
-
-        listings.forEach((listing, index) => {
-          reply += `${index + 1}. <b>${listing.title}</b><br>` +
-            `   📍 ${listing.location}, ${listing.country}<br>` +
-            `   💰 ₹${listing.price.toLocaleString('en-IN')}/night<br><br>`;
-        });
-
-        reply += "Visit our <a href='/listings'>listings page</a> to see all available properties!";
-      } else {
-        reply = "😔 Sorry, I couldn't find any listings matching your search. Try browsing our <a href='/listings'>all listings</a>!";
-      }
-    }
-
-    // Price information
-    else if (userMessage.match(/(price|cost|expensive|cheap|budget|affordable)/i)) {
-      const stats = await Listing.aggregate([
-        {
-          $group: {
-            _id: null,
-            avgPrice: { $avg: "$price" },
-            minPrice: { $min: "$price" },
-            maxPrice: { $max: "$price" }
-          }
-        }
-      ]);
-
-      if (stats.length > 0) {
-        const { avgPrice, minPrice, maxPrice } = stats[0];
-        reply = "💰 <b>Pricing Information:</b><br><br>" +
-          `📊 Average: ₹${Math.round(avgPrice).toLocaleString('en-IN')}/night<br>` +
-          `💵 Starting from: ₹${minPrice.toLocaleString('en-IN')}/night<br>` +
-          `💎 Up to: ₹${maxPrice.toLocaleString('en-IN')}/night<br><br>` +
-          "We have options for every budget! Check out our <a href='/listings'>listings</a> to find your perfect stay.";
-      }
-    }
-
-    // Booking help
-    else if (userMessage.match(/(book|reserve|reservation|how to book)/i)) {
-      reply = "📅 <b>How to Book:</b><br><br>" +
-        "1️⃣ Browse our <a href='/listings'>listings</a><br>" +
-        "2️⃣ Click on a property you like<br>" +
-        "3️⃣ Click the <b>'Reserve'</b> button<br>" +
-        "4️⃣ Fill in your details and dates<br>" +
-        "5️⃣ Complete payment securely<br><br>" +
-        "✅ You'll receive confirmation within 24 hours!";
-    }
-
-    // Cancellation policy
-    else if (userMessage.match(/(cancel|refund|cancellation policy)/i)) {
-      reply = "🔄 <b>Cancellation Policy:</b><br><br>" +
-        "✅ <b>Free cancellation</b> within 24 hours of booking<br>" +
-        "⏰ After 24 hours, cancellation depends on the host's policy<br>" +
-        "💰 Full refund if booking isn't confirmed by host<br><br>" +
-        "For specific property policies, check the listing details page.";
-    }
-
-    // Contact/Support
-    else if (userMessage.match(/(contact|support|help|customer service|email|phone)/i)) {
-      reply = "📞 <b>Customer Support:</b><br><br>" +
-        "📧 Email: support@roamhaven.com<br>" +
-        "📱 Phone: +91 1234567890<br>" +
-        "⏰ Available: 24/7<br><br>" +
-        "We're here to help! Feel free to reach out anytime.";
-    }
-
-    // Categories
-    else if (userMessage.match(/(category|type|trending|popular|iconic|mountain|beach)/i)) {
-      const categories = await Listing.distinct("category");
-      reply = "🏷️ <b>Browse by Category:</b><br><br>";
-
-      const categoryIcons = {
-        'trending': '🔥',
-        'rooms': '🛏️',
-        'iconic_cities': '🏙️',
-        'mountains': '⛰️',
-        'castles': '🏰',
-        'pools': '🏊',
-        'camping': '⛺',
-        'farms': '🌾',
-        'arctic': '❄️'
-      };
-
-      categories.forEach(cat => {
-        const icon = categoryIcons[cat] || '📍';
-        reply += `${icon} ${cat.replace('_', ' ').toUpperCase()}<br>`;
-      });
-
-      reply += "<br>Visit our <a href='/listings'>listings page</a> and use the filters to explore!";
-    }
-
-    // Thank you
-    else if (userMessage.match(/(thank|thanks|appreciate)/i)) {
-      reply = "😊 You're welcome! Happy to help. If you have any other questions, just ask!<br><br>" +
-        "Safe travels! 🌍✈️";
-    }
-
-    // Goodbye
-    else if (userMessage.match(/(bye|goodbye|see you|later)/i)) {
-      reply = "👋 Goodbye! Thanks for chatting with RoamMate. Have a wonderful day and happy travels! 🌟";
-    }
-
-    // Default response
-    else {
-      reply = "🤔 I'm not sure I understand. I can help you with:<br><br>" +
-        "🏠 Finding listings in specific locations<br>" +
-        "💰 Price information<br>" +
-        "📅 Booking process<br>" +
-        "🔄 Cancellation policies<br>" +
-        "📞 Customer support<br>" +
-        "🏷️ Browse categories<br><br>" +
-        "What would you like to know?";
-    }
-
-    res.json({ reply });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      reply: "😔 Sorry, I'm having trouble right now. Please try again or contact our support team at support@roamhaven.com"
+// IMPORTANT: 404 + global error handlers MUST be registered AFTER
+// startGraphQL() resolves. Apollo's app.use('/graphql') is async, and if we
+// register NotFoundError before Apollo mounts its middleware, then 404 wins
+// the Express ordering race and GraphQL endpoint always 404s.
+startGraphQL()
+  .catch((err) => {
+    console.error("Failed to start GraphQL server", err);
+  })
+  .finally(() => {
+    // 404 handler — registered after all route mounts, catches anything not matched above.
+    // Express 5 note: plain `app.use` middleware avoids the path-to-regexp v7 strict parser
+    // (bare `*` splat pattern is no longer valid; splats now require `:paramName*` syntax.)
+    app.use((req, res, next) => {
+      next(new NotFoundError("Page Not Found"));
     });
-  }
-});
 
-app.use((err, req, res, next) => {
-  let { statusCode = 500, message = "Something went wrong" } = err;
-  res.status(statusCode).render("error", { message });
-  //   res.status(statusCode).send(message);
-});
+    // Global error handler
+    app.use((err, req, res, next) => {
+      // Log error for debugging
+      if (process.env.NODE_ENV !== 'production' || !err.isOperational) {
+        logger.error('Error:', {
+          name: err.name,
+          message: err.message,
+          statusCode: err.statusCode,
+          stack: err.stack,
+          path: req.path,
+          method: req.method,
+          userId: req.user?._id,
+          correlationId: req.correlationId,
+        });
+      }
 
+      let { statusCode = 500, message = "Something went wrong", errors = null } = err;
 
+      // Handle API requests differently
+      if (req.path.startsWith('/api') || req.path.startsWith('/graphql')) {
+        return res.status(statusCode).json({
+          error: message,
+          statusCode,
+          correlationId: req.correlationId,
+          ...(errors && { errors }),
+          ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+        });
+      }
 
+      // Handle web requests
+      if (statusCode >= 500) {
+        req.flash("error", "Something went wrong. Please try again later.");
+      } else if (statusCode === 404) {
+        req.flash("error", message);
+      } else if (statusCode === 401 || statusCode === 403) {
+        req.flash("error", message);
+      } else {
+        req.flash("error", message);
+      }
 
+      res.status(statusCode).render("error", { message, statusCode });
+    });
+  });
 
-app.listen(8080, () => {
-  console.log("server is listening to port 8080");
-});
+module.exports = { app, server };
+
+if (require.main === module) {
+  server.listen(8080, () => {
+    logger.info("server is listening to port 8080");
+  });
+}
